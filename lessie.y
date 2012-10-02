@@ -87,12 +87,13 @@ int level = 0;
 %token RETURN STRUCT
 %token POINT_
 %token COMMA
+%token STRING_ STRING_LITERAL_
 %%
 program : declarationList;
 declarationList : declaration | declarationList declaration;
 declaration : variableDeclaration | functionDeclaration | structDeclaration;
 variableDeclaration : type ID_ SEMICOLON_ | type  ID_ SQUARE_OPEN_ CTI_ SQUARE_CLOSE_  SEMICOLON_; 
-type : INT_ | STRUCT ID_;
+type : INT_ | STRING_ | STRUCT ID_;
 structDeclaration : STRUCT ID_ CURLY_OPEN_ structBody CURLY_CLOSE_;
 structBody : structBody memberDeclaration | memberDeclaration;
 memberDeclaration : variableDeclaration | functionDeclaration;
@@ -112,7 +113,7 @@ iterationInstruction : FOR PAR_OPEN_ optionalExpression SEMICOLON_ expression SE
 optionalExpression : /* eps */ | expression;
 returnInstruction : RETURN expression SEMICOLON_ ;
 expression : equalityExpression | ID_ asignationOperator expression | ID_ SQUARE_OPEN_ expression SQUARE_CLOSE_ asignationOperator expression | 
-             ID_ POINT_ ID_ asignationOperator expression;
+             ID_ POINT_ ID_ asignationOperator expression | STRING_LITERAL_;
 equalityExpression : relationalExpression | equalityExpression equalityOperator relationalExpression ;
 relationalExpression : additiveExpression | relationalExpression relationalOperator additiveExpression ;
 additiveExpression : multiplicativeExpression | additiveExpression additiveOperator multiplicativeExpression;

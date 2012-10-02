@@ -1,7 +1,7 @@
 program=lessie
 testdir=test/
 CC = g++    
-CFLAGS = -lfl -Wno-write-strings 
+CFLAGS = -Wno-write-strings 
 
 # For debug activate -DDEBUG in CFLAGS
 
@@ -14,8 +14,6 @@ flex:
 bison:
 	bison -t -d lessie.y
 
-
-	
 clean:
 	rm -f lex.yy.c
 	rm -f lessie.tab.c

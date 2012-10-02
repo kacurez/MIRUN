@@ -11,7 +11,7 @@ char* createId();
 
 const int MAX_LENGTH = 14; // maximum length of id in characters
 %}
-
+%option noyywrap
 /* %option c++ */
 
 DIGIT      [0-9]
@@ -29,6 +29,7 @@ LETTER      [a-zA-Z_]
 "return" { return RETURN; }
 "for"   { return FOR; }
 "struct" {return STRUCT; }
+"string" {return STRING_; }
 {WHITESPACE}+ 
 "\n" {yylineno++;}
 "}"  { return CURLY_CLOSE_; }
@@ -56,7 +57,7 @@ LETTER      [a-zA-Z_]
 "."  { return POINT_; }
 ","  { return COMMA; }
 
-
+L?\"(\\.|[^\\"])*\"	{ return STRING_LITERAL_; }
 {REAL}  {yylval.integer = truncCreal(); printf("Warning: Conversion from real to int in line %i\n", yylineno);  return CTI_;}
 {DIGIT}+ { yylval.integer =createCnumber(); return CTI_; }
 {LETTER}({LETTER}|{DIGIT})* {  yylval.id = createId(); return ID_; }
@@ -118,7 +119,7 @@ int main(int argc, char **argv) {
         else fprintf(stdout, "\nNumber of errors: %d\n", numErrores); 
      }
    }
-   else fprintf(stderr, "Usage: cmc [-v] [-t] file\n");
+   else fprintf(stderr, "Usage: lessie [-v] [-t] file\n");
 
   return 0;
 }
