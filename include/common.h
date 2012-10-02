@@ -13,7 +13,7 @@ extern int yylex();
 extern int yyparse();
 extern char* yytext;
 extern int yylineno;
-extern "C" { int yyerror(char *s); }
+extern "C" {int yyerror(const char *s);}
 void declareVariable(int n, char *nom, int type, int desp, int size, int ref);
 void declareSymbol(char *nom, int category, int type, int desp, int level, int ref);
 

@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
    }
    else fprintf(stderr, "Usage: cmc [-v] [-t] file\n");
 
-  //return 0;
+  return 0;
 }
 
 

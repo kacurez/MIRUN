@@ -1,7 +1,7 @@
 program=lessie
 testdir=test/
 CC = g++    
-CFLAGS = -lfl -ltds -lgci -Wno-write-strings 
+CFLAGS = -lfl -Wno-write-strings 
 
 # For debug activate -DDEBUG in CFLAGS
 

@@ -2,7 +2,70 @@
 #include <stdio.h>
 #include "common.h"
 extern int yylineno;
+int verbose = FALSE;
+int showTDS = FALSE;
+int numErrores = 0;
+int level = 0;
+
 %}
+%union {
+    char *id;
+    int integer;
+    struct {
+        int type; // STRUCT or INTEGER
+        int ref; // n.ref if it is a struct
+        int size; 
+    } type;
+    struct {
+        int type;
+        char *name;
+        int size; // In case of arrays this is not equal to type.size
+        int ref;
+    } variableDeclaration;
+    struct {
+        int returnType; // STRUCT or INTEGER
+        int returnTypeRef;
+        int desp;
+        int parameterRef; 
+        char *name;
+    } functionHead;
+    struct {
+        int desp;
+        int parameterRef; // "Dominio"
+    } formalParameters, formalParameterList;
+    struct {
+        int fieldsRef;
+        int desp;
+    } fieldList;
+    struct {
+        int desp;
+    } declarationList;
+    struct {
+        int desp;
+    } localVariableDeclaration;
+    struct {
+        int pos;
+        int type; 
+        int size;
+    } expression;
+    struct {
+        int oldDvar;
+    } block; 
+    struct {
+        int label;
+        int ref;
+    } forHelper;
+    struct {
+        int ref;
+    } actualParameters, actualParameterList;
+    int incrementOperator;
+    int multiplicativeOperator;
+    int additiveOperator;
+    int asignationOperator;
+    int hasRef;
+    int relationalOperator;
+    int equalityOperator;
+}
 
 %error-verbose
 
@@ -74,7 +137,7 @@ unaryOperator : PLUS | MINUS;
 
 %%
 
-yyerror(char *s) 
+int yyerror(const char *s) 
 {
   printf("Line %d: %s\n", yylineno, s);
 }
