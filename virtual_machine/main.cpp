@@ -5,6 +5,6 @@ using namespace std;
 
 int main()
 {
-    ClassLoader cl;
-    cl.load("data/sample1.lessie");
+    ClassLoader cl("data");
+    delete cl.loadClass("MyClass");
 }

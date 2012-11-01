@@ -4,21 +4,23 @@
 #include <string>
 #include <inttypes.h>
 
-class Function
+class Method
 {
 public:
-	Function(const char * name);
-	virtual ~Function();
+	Method(const char * name);
+	virtual ~Method();
 	std::string getName() const;
-	const unsigned char * getCode() const;
-	void setCode(const unsigned char * val, uint16_t size, uint32_t offset = 0);
+	const char * getCode() const;
+	void setCode(const char * val, uint16_t size, uint32_t offset = 0);
 	uint8_t getParamCount() const;
 	void setParamCount(uint8_t val);
+	void setFlag(uint8_t flag);
 private:
 	std::string name;
-	unsigned char * code;
+	char * code;
 	uint16_t codeSize;
 	uint8_t paramCount;
+	uint8_t flag;
 };
 
 #endif // FUNCTION_H

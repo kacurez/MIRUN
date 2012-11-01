@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 #include <inttypes.h>
-#include "function.h"
+#include "method.h"
+#include "constantpool.h"
 
 class Class
 {
@@ -12,15 +13,17 @@ public:
 	Class(const char * name);
 	~Class();
 	std::string getName() const;
-	void addMethod(Function * f);
-	const Function * getMethod(uint8_t i) const;
+	void addMethod(Method * f);
+	const Method * getMethod(uint8_t i) const;
 	int getFieldCount() const;
 	void setFieldCount(uint8_t fieldCount);
+	void setConstPool(ConstantPool * pool);
 	
 private:
 	std::string name;
-	std::vector<Function *> methods;
+	std::vector<Method *> methods;
 	uint8_t fieldCount;
+	ConstantPool * pool;
 };
 
 #endif // CLASS_H

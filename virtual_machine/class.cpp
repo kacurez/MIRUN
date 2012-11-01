@@ -7,7 +7,12 @@ Class::Class(const char * name): name(name)
 
 Class::~Class()
 {
-	//dtor
+	for(std::vector<Method *>::iterator it = methods.begin(); it != methods.end(); it ++)
+	{
+		delete *it;
+	}
+	methods.clear();
+	delete pool;
 }
 
 void Class::setFieldCount(uint8_t fieldCount)
@@ -20,12 +25,12 @@ int Class::getFieldCount() const
 	return fieldCount;
 }
 
-const Function * Class::getMethod(uint8_t i) const
+const Method * Class::getMethod(uint8_t i) const
 {
 	return methods[i];
 }
 
-void Class::addMethod(Function * f)
+void Class::addMethod(Method * f)
 {
 	methods.push_back(f);
 }
@@ -33,5 +38,10 @@ void Class::addMethod(Function * f)
 std::string Class::getName() const
 {
 	return name;
+}
+
+void Class::setConstPool(ConstantPool * pool)
+{
+	this->pool = pool;
 }
 

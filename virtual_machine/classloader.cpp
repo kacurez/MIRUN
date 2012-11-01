@@ -1,11 +1,11 @@
 #include "classloader.h"
 #include <inttypes.h>
 #include <iostream>
+#include "bytecodeconstants.h"
 
-#define IDENTIFIER_LENGTH 25
 using namespace std;
 
-ClassLoader::ClassLoader(): file()
+ClassLoader::ClassLoader(const char * folder): folder(folder), file()
 {
 }
 
@@ -13,49 +13,55 @@ ClassLoader::~ClassLoader()
 {
 }
 
-void ClassLoader::load(const char * filename)
+Class * ClassLoader::loadClass(const char * className)
 {
-	uint16_t classCount;
-	file.open(filename,  ios::in | ios::binary);
-	file.read((char *)&classCount, sizeof(uint16_t));
-	cout << "class count = " << classCount << endl;
-	while(file.peek() != EOF)
-	{
-		loadClass();
-	}
-	file.close();
-}
-
-struct MethodRef
-{
-	char name[IDENTIFIER_LENGTH];
-	uint8_t params;
-};
-
-struct ClassRef
-{
-	char name[IDENTIFIER_LENGTH];
 	uint16_t id;
-};
-
-struct StringConst
-{
-	uint16_t length;
-	char * value;
-};
-
-typedef uint32_t IntConst;
-
-typedef double RealConst;
-
-void ClassLoader::loadClass()
-{
-	uint16_t id, poolSize;
+	uint8_t fieldCount, methodCount;
 	char name[IDENTIFIER_LENGTH];
 	Class * cl;
+	file.open(getFileName(className).c_str(),  ios::in | ios::binary);
 	file.read((char *)&id, sizeof(uint16_t));
 	file.read(name, IDENTIFIER_LENGTH);
 	cl = new Class(name);
+	cl->setConstPool(loadConstantPool());
+	file.read((char *)&fieldCount, sizeof(uint8_t));
+	cl->setFieldCount(fieldCount);
+	file.read((char *)&methodCount, sizeof(uint8_t));
+	for(uint8_t i = 0; i < methodCount; i ++)
+	{
+		cl->addMethod(loadMethod());
+	}
+	file.close();
+	cout << "id = " << id << "\nname = " << cl->getName() << endl;
+	return cl;
+}
+
+
+Method * ClassLoader::loadMethod()
+{
+	char name[IDENTIFIER_LENGTH];
+	uint8_t flag, paramCount;
+	uint16_t codeSize;
+	char * code;
+	file.read(name, IDENTIFIER_LENGTH);
+	Method * m = new Method(name);
+	file.read((char *)&flag, sizeof(uint8_t));
+	m->setFlag(flag);
+	file.read((char *)&paramCount, sizeof(uint8_t));
+	m->setParamCount(paramCount);
+	file.read((char *)&codeSize, sizeof(uint16_t));
+	code = new char[codeSize];
+	file.read(code, codeSize);
+	m->setCode(code, codeSize);
+	delete [] code;
+	return m;
+}
+
+ConstantPool * ClassLoader::loadConstantPool()
+{
+	uint16_t poolSize;
+	ConstantPool * pool = new ConstantPool();
+	ConstPoolStruct * item;
 	file.read((char *)&poolSize, sizeof(uint16_t));
 	for(uint16_t i = 0; i < poolSize; i ++)
 	{
@@ -63,37 +69,58 @@ void ClassLoader::loadClass()
 		file.read((char *)&type, sizeof(uint8_t));
 		switch(type)
 		{
-			case 1:
-				MethodRef m;
-				file.read((char *)&m, sizeof(MethodRef));
-				cout << "MethodRef[\"" << m.name << "\", " << m.params << "]" << endl;
+			case METHOD_REF:
+			{
+				item = new MethodRef;
+				file.read((char *)item, sizeof(MethodRef));
+				cout << "MethodRef[\"" << ((MethodRef *)item)->name << "\", " << ((MethodRef *)item)->params << "]" << endl;
 				break;
-			case 2:
-				ClassRef c;
-				file.read((char *)&c, sizeof(ClassRef));
-				cout << "ClassRef[\"" << c.name << "\", " << c.id << "]" << endl;
+			}
+			case CLASS_REF:
+			{
+				item = new ClassRef;
+				file.read((char *)item, sizeof(ClassRef));
+				cout << "ClassRef[\""  << ((ClassRef *)item)->name << "\", " << ((ClassRef *)item)->id << "]" << endl;
 				break;
-			case 3:
-				StringConst s;
-				file.read((char *)&s.length, sizeof(uint16_t));
-				s.value = new char[s.length];
-				file.read(s.value, s.length);
-				cout << "String[\"" << s.value << "\", " << s.length << "]" << endl;
+			}
+			case STRING_CONST:
+			{
+				StringConst * s = new StringConst;
+				item = s;
+				file.read((char *)&s->length, sizeof(uint16_t));
+				s->value = new char[s->length];
+				file.read(s->value, s->length);
+				cout << "String[\""  << s->value << "\", " << s->length << "]" << endl;
 				break;
-			case 4:
-				IntConst i;
-				file.read((char *)&i, sizeof(IntConst));
-				cout << "Int[" << i << "]" << endl;
+			}
+			case INT_CONST:
+			{
+				item = new IntConst;
+				file.read((char *)item, sizeof(IntConst));
+				cout << "Int[" << ((IntConst *)item)->value << "]" << endl;
 				break;
-			case 5:
-				RealConst r;
-				file.read((char *)&r, sizeof(RealConst));
-				cout << "Real[" << r << "]" << endl;
+			}
+			case REAL_CONST:
+			{
+				item = new RealConst;
+				file.read((char *)item, sizeof(RealConst));
+				cout << "Real[" << ((RealConst *)item)->value << "]" << endl;
 				break;
+			}
 			default:
 				throw 10;
 		}
+		pool->addItem(item, (ConstPoolTag) type);
 	}
-	cout << "id = " << id << "\nname = " << cl->getName() << endl;
-	delete cl;
+	return pool;
 }
+
+
+
+string ClassLoader::getFileName(const char * className)
+{
+	string filename = folder;
+	filename.append("/").append(className).append(".lessie");
+	return filename;
+}
+

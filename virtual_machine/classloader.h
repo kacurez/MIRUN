@@ -4,20 +4,25 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <string>
 #include "class.h"
+#include "method.h"
+#include "constantpool.h"
 
 class ClassLoader
 {
 public:
-	ClassLoader();
+	ClassLoader(const char * folder);
 	~ClassLoader();
-	void load(const char * filename);
+	Class * loadClass(const char * className);
 
 private:
-	void loadClass();
+	Method * loadMethod();
+	ConstantPool * loadConstantPool();
+	std::string getFileName(const char * className);
 
+	std::string folder;
 	std::fstream file;
-	std::vector<Class *> classTable;
 
 };
 
