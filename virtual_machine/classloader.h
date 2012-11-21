@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <map>
 #include "class.h"
 #include "method.h"
 #include "constantpool.h"
@@ -14,15 +15,17 @@ class ClassLoader
 public:
 	ClassLoader(const char * folder);
 	~ClassLoader();
-	Class * loadClass(const char * className);
+	Class * getClass(const char * className);
 
 private:
+	Class * loadClass(const char * className);
 	Method * loadMethod();
 	ConstantPool * loadConstantPool();
 	std::string getFileName(const char * className);
 
 	std::string folder;
 	std::fstream file;
+	std::map<std::string, Class *> classTable;
 
 };
 

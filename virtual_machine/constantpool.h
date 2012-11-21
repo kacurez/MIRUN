@@ -19,7 +19,6 @@ struct MethodRef: public ConstPoolStruct
 struct ClassRef: public ConstPoolStruct
 {
 	char name[IDENTIFIER_LENGTH];
-	uint16_t id;
 };
 
 struct StringConst: public ConstPoolStruct

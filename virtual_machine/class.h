@@ -14,7 +14,8 @@ public:
 	~Class();
 	std::string getName() const;
 	void addMethod(Method * f);
-	const Method * getMethod(uint8_t i) const;
+	Method * getMethod(uint8_t i) const;
+	Method * getMethod(const char * name) const;
 	int getFieldCount() const;
 	void setFieldCount(uint8_t fieldCount);
 	void setConstPool(ConstantPool * pool);

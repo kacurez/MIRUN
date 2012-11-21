@@ -25,9 +25,21 @@ int Class::getFieldCount() const
 	return fieldCount;
 }
 
-const Method * Class::getMethod(uint8_t i) const
+Method * Class::getMethod(uint8_t i) const
 {
 	return methods[i];
+}
+
+Method * Class::getMethod(const char * name) const
+{
+	for(std::vector<Method *>::const_iterator it = methods.begin(); it != methods.end(); it ++)
+	{
+		if((*it)->getName() == name)
+		{
+			return *it;
+		}
+	}
+	throw "No such method.";
 }
 
 void Class::addMethod(Method * f)

@@ -5,12 +5,27 @@
 
 using namespace std;
 
-ClassLoader::ClassLoader(const char * folder): folder(folder), file()
+ClassLoader::ClassLoader(const char * folder): folder(folder), file(), classTable()
 {
 }
 
 ClassLoader::~ClassLoader()
 {
+	for(map<string, Class *>::iterator it = classTable.begin(); it != classTable.end(); it++)
+	{
+		delete it->second;
+	}
+	classTable.clear();
+}
+
+Class * ClassLoader::getClass(const char * className)
+{
+	if(classTable.find(className) == classTable.end())
+	{
+		Class * c = loadClass(className);
+		classTable[className] = c;
+	}
+	return classTable[className];
 }
 
 Class * ClassLoader::loadClass(const char * className)
@@ -20,13 +35,19 @@ Class * ClassLoader::loadClass(const char * className)
 	char name[IDENTIFIER_LENGTH];
 	Class * cl;
 	file.open(getFileName(className).c_str(),  ios::in | ios::binary);
+	if(!file.good())
+	{
+		throw "Class not found!";
+	}
 	file.read((char *)&id, sizeof(uint16_t));
 	file.read(name, IDENTIFIER_LENGTH);
 	cl = new Class(name);
 	cl->setConstPool(loadConstantPool());
 	file.read((char *)&fieldCount, sizeof(uint8_t));
 	cl->setFieldCount(fieldCount);
+	cout << "field count = " << (int)fieldCount << endl;
 	file.read((char *)&methodCount, sizeof(uint8_t));
+	cout << "method count = " << (int)methodCount << endl;
 	for(uint8_t i = 0; i < methodCount; i ++)
 	{
 		cl->addMethod(loadMethod());
@@ -40,7 +61,7 @@ Class * ClassLoader::loadClass(const char * className)
 Method * ClassLoader::loadMethod()
 {
 	char name[IDENTIFIER_LENGTH];
-	uint8_t flag, paramCount;
+	uint8_t flag, paramCount, localCount;
 	uint16_t codeSize;
 	char * code;
 	file.read(name, IDENTIFIER_LENGTH);
@@ -49,11 +70,14 @@ Method * ClassLoader::loadMethod()
 	m->setFlag(flag);
 	file.read((char *)&paramCount, sizeof(uint8_t));
 	m->setParamCount(paramCount);
+	file.read((char *)&localCount, sizeof(uint8_t));
+	m->setParamCount(localCount);
 	file.read((char *)&codeSize, sizeof(uint16_t));
 	code = new char[codeSize];
 	file.read(code, codeSize);
 	m->setCode(code, codeSize);
 	delete [] code;
+	cout << m->debugString() << endl;
 	return m;
 }
 
@@ -63,6 +87,7 @@ ConstantPool * ClassLoader::loadConstantPool()
 	ConstantPool * pool = new ConstantPool();
 	ConstPoolStruct * item;
 	file.read((char *)&poolSize, sizeof(uint16_t));
+	cout << "const pool size = " << poolSize << endl;
 	for(uint16_t i = 0; i < poolSize; i ++)
 	{
 		uint8_t type;
@@ -73,14 +98,14 @@ ConstantPool * ClassLoader::loadConstantPool()
 			{
 				item = new MethodRef;
 				file.read((char *)item, sizeof(MethodRef));
-				cout << "MethodRef[\"" << ((MethodRef *)item)->name << "\", " << ((MethodRef *)item)->params << "]" << endl;
+				cout << "MethodRef[\"" << ((MethodRef *)item)->name << "\", " << (int)((MethodRef *)item)->params << "]" << endl;
 				break;
 			}
 			case CLASS_REF:
 			{
 				item = new ClassRef;
 				file.read((char *)item, sizeof(ClassRef));
-				cout << "ClassRef[\""  << ((ClassRef *)item)->name << "\", " << ((ClassRef *)item)->id << "]" << endl;
+				cout << "ClassRef[\""  << ((ClassRef *)item)->name << "\"]" << endl;
 				break;
 			}
 			case STRING_CONST:

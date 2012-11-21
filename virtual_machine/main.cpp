@@ -6,5 +6,5 @@ using namespace std;
 int main()
 {
     ClassLoader cl("data");
-    delete cl.loadClass("MyClass");
+    cl.getClass("MyClass");
 }

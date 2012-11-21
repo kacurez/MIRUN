@@ -7,7 +7,7 @@ ConstantPool::ConstantPool()
 
 ConstantPool::~ConstantPool()
 {
-	for(int i = 0; i < pool.size(); i++)
+	for(unsigned int i = 0; i < pool.size(); i++)
 	{
 		ConstPoolStruct * s = pool[i];
 		if(poolType[i] == STRING_CONST)

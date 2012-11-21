@@ -8,12 +8,16 @@
 class StackFrame
 {
 public:
-	StackFrame(uint32_t localCount, StackFrame * parent = 0);
+	StackFrame(uint32_t localCount, const char * code, StackFrame * parent = 0);
 	~StackFrame();
 	void push(uint32_t item);
 	void pushLocal(uint32_t index);
 	void storeLocal(uint32_t index);
 	uint32_t pop();
+	StackFrame * getParent() const;
+	
+	const char * code;
+	uint32_t programCounter;
 	
 private:
 	uint32_t localCount;

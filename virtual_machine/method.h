@@ -15,12 +15,17 @@ public:
 	uint8_t getParamCount() const;
 	void setParamCount(uint8_t val);
 	void setFlag(uint8_t flag);
+	void setLocals(uint8_t locals);
+	uint8_t getLocals() const;
+	std::string debugString() const;
+	
 private:
 	std::string name;
 	char * code;
 	uint16_t codeSize;
 	uint8_t paramCount;
 	uint8_t flag;
+	uint8_t locals;
 };
 
 #endif // FUNCTION_H

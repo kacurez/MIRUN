@@ -1,6 +1,6 @@
 #include "stackframe.h"
 
-StackFrame::StackFrame(uint32_t localCount, StackFrame * parent): localCount(localCount), stackPointer(0), parent(parent)
+StackFrame::StackFrame(uint32_t localCount, const char * code, StackFrame * parent): code(code), programCounter(0), localCount(localCount), stackPointer(0), parent(parent)
 {
 	locals = new uint32_t[localCount];
 }
@@ -50,4 +50,8 @@ void StackFrame::pushLocal(uint32_t index)
 	}
 }
 
+StackFrame * StackFrame::getParent() const
+{
+	return parent;
+}
 
