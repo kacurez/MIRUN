@@ -6,7 +6,13 @@ enum INSTRUCTION  {
 	SUB,
 	MUL,
 	DIV,
+	/**
+	 * Compare references if equal.
+	 */
 	CMP_EQ,
+	/**
+	 * Compare references if not equal.
+	 */
 	CMP_NE,
 	INC,
 	DEC,

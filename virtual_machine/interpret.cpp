@@ -1,5 +1,5 @@
 #include "interpret.h"
-#include <stack>
+#include <assert.h>
 
 Interpret::Interpret(ClassLoader * classLoader): classLoader(classLoader), heap(new Memory())
 {
@@ -33,7 +33,22 @@ int Interpret::run()
 				doAritmetics(i);
 				break;
 			case CMP_EQ:
+			{
+				int32_t res = currentFrame->pop() - currentFrame->pop();
+				currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), res));
+				break;
+			}
 			case CMP_NE:
+			{
+				if(currentFrame->pop() != currentFrame->pop())
+				{
+					currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), 0));
+				} else
+				{
+					currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), 1));
+				}
+				break;
+			}
 			case INC:
 				addConst(1);
 				break;
@@ -41,16 +56,25 @@ int Interpret::run()
 				addConst(-1);
 				break;
 			case NEW:
+			{
+				uint16_t classNamePtr = currentFrame->nextShort();
+				ConstPoolItem * i = currentFrame->constants->getItem(classNamePtr);
+				assert(i->getType() == CLASS_REF);
+				currentFrame->push(heap->allocate(classLoader->getClass(i->getStringValue())));
 				break;
+			}	
 			case NEW_ARRAY:
 				break;
 			case JMP:
+				doJump();
 				break;
 			case CALL:
 			{
 				uint16_t classNamePtr = currentFrame->nextShort();
 				uint8_t methodPtr = currentFrame->nextByte();
-				Class * c;//TODO get class by name from const pool
+				ConstPoolItem * i = currentFrame->constants->getItem(classNamePtr);
+				assert(i->getType() == CLASS_REF);
+				Class * c = classLoader->getClass(i->getStringValue());
 				Method * m = c->getMethod(methodPtr);
 				callMethod(c, m);
 				break;
@@ -59,9 +83,17 @@ int Interpret::run()
 			{
 				Class * c = fetchObject()->getType();
 				uint16_t methodNamePtr = currentFrame->nextShort();
-				const char * methodName;//TODO get method name from const pool
+				ConstPoolItem * i = currentFrame->constants->getItem(methodNamePtr);
+				assert(i->getType() == METHOD_REF);
+				const char * methodName = i->getStringValue();
 				Method * m = c->getMethod(methodName);
-				callMethod(c, m);
+				if(m && m->getParamCount() == i->getParam())
+				{
+					callMethod(c, m);
+				} else
+				{
+					throw "No such method.";
+				}
 				break;
 			}
 			case RET:
@@ -77,16 +109,85 @@ int Interpret::run()
 				break;
 			}
 			case IF_EQ:
+				if(fetchInteger() == 0)
+				{
+					doJump();
+				}
+				break;
 			case IF_GT:
+				if(fetchInteger() > 0)
+				{
+					doJump();
+				}
+				break;
 			case IF_LT:
+				if(fetchInteger() < 0)
+				{
+					doJump();
+				}
+				break;
 			case IF_GE:
+				if(fetchInteger() >= 0)
+				{
+					doJump();
+				}
+				break;
 			case IF_LE:
+				if(fetchInteger() <= 0)
+				{
+					doJump();
+				}
+				break;
 			case IF_NE:
+				if(fetchInteger() != 0)
+				{
+					doJump();
+				}
+				break;
 			case PUSH:
+			{
+				uint16_t index = currentFrame->nextShort();
+				ConstPoolItem * item = currentFrame->constants->getItem(index);
+				switch(item->getType())
+				{
+					case INT_CONST:
+						currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), item->getIntValue()));
+						break;
+					case REAL_CONST:
+						currentFrame->push(heap->allocateNumber(classLoader->getClass(REAL_CLASS), item->getRealValue()));
+						break;
+					case STRING_CONST:
+						currentFrame->push(heap->allocateString(classLoader->getClass(STRING_CLASS), item->getStringValue()));
+						break;
+					default:
+						throw "Not a constant.";
+				}
+				break;
+			}
 			case LOAD:
+			{
+				Object * o = fetchObject();
+				uint8_t field = currentFrame->nextByte();
+				currentFrame->push(o->getValue(field));
+				break;
+			}
 			case STORE:
+			{
+				Object * o = fetchObject();
+				uint8_t field = currentFrame->nextByte();
+				o->setValue(field, currentFrame->pop());
+				break;
+			}
 			case LOAD_LOCAL:
+			{
+				currentFrame->pushLocal(currentFrame->nextByte());
+				break;
+			}
 			case STORE_LOCAL:
+			{
+				currentFrame->storeLocal(currentFrame->nextByte());
+				break;
+			}
 			case POP:
 				currentFrame->pop();
 				break;
@@ -107,10 +208,8 @@ void Interpret::doAritmetics(INSTRUCTION i)
 {
 	Object * op1 = fetchObject();
 	Object * op2 = fetchObject();
-	if(!(checkNumber(op1) && checkNumber(op2)))
-	{
-		throw "Not a number.";
-	}
+	checkNumber(op1);
+	checkNumber(op2);
 	if(op1->getType() == classLoader->getClass(REAL_CLASS) ||  op2->getType() == classLoader->getClass(REAL_CLASS))
 	{
 		doRealAritmetics(op1, op2, i);
@@ -120,9 +219,20 @@ void Interpret::doAritmetics(INSTRUCTION i)
 	}
 }
 
-bool Interpret::checkNumber(Object * o) const
+void Interpret::checkNumber(Object * o) const
 {
-	return o->getType() == classLoader->getClass(INT_CLASS) || o->getType() == classLoader->getClass(REAL_CLASS);
+	if(!(o->getType() == classLoader->getClass(INT_CLASS) || o->getType() == classLoader->getClass(REAL_CLASS)))
+	{
+		throw "Not a number.";
+	}
+}
+
+void Interpret::checkInteger(Object * o) const
+{
+	if(o->getType() != classLoader->getClass(INT_CLASS))
+	{
+		throw "Not an integer.";
+	}
 }
 
 void Interpret::doRealAritmetics(Object * op1, Object *  op2, INSTRUCTION i)
@@ -164,9 +274,9 @@ void Interpret::doRealAritmetics(Object * op1, Object *  op2, INSTRUCTION i)
 
 void Interpret::doIntAritmetics(Object * op1, Object *  op2, INSTRUCTION i)
 {
-	int left = op1->getValue(0);
-	int right = op2->getValue(0);
-	int result;
+	int32_t left = op1->getValue(0);
+	int32_t right = op2->getValue(0);
+	int32_t result;
 	switch(i)
 	{
 		case ADD:
@@ -190,11 +300,8 @@ void Interpret::doIntAritmetics(Object * op1, Object *  op2, INSTRUCTION i)
 void Interpret::addConst(int c)
 {
 	Object * o = fetchObject();
-	if(o->getType() != classLoader->getClass(INT_CLASS))
-	{
-		throw "Not an integer.";
-	}
-	currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), (int)(o->getValue(0)) + c));
+	checkInteger(o);
+	currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), (int32_t)(o->getValue(0)) + c));
 }
 
 void Interpret::callMethod(Class * cls, Method * m)
@@ -205,4 +312,17 @@ void Interpret::callMethod(Class * cls, Method * m)
 		nextFrame->setLocal(i, currentFrame->pop());
 	}
 	currentFrame = nextFrame;
+}
+
+void Interpret::doJump()
+{
+	int8_t offset = currentFrame->nextShort();
+	currentFrame->programCounter += offset;
+}
+
+int32_t Interpret::fetchInteger()
+{
+	Object * o = fetchObject();
+	checkInteger(o);
+	return o->getValue(0);
 }

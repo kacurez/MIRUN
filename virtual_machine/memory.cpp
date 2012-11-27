@@ -49,7 +49,7 @@ uint32_t Memory::allocateNumber(Class * cls, double value)
 	}
 }
 
-uint32_t Memory::allocateNumber(Class * cls, int value)
+uint32_t Memory::allocateNumber(Class * cls, int32_t value)
 {
 	if(cls->getName() == REAL_CLASS)
 	{
@@ -67,3 +67,17 @@ uint32_t Memory::allocateNumber(Class * cls, int value)
 	}
 }
 
+uint32_t Memory::allocateString(Class * cls, const char * value)
+{
+	StringObject * str = new StringObject(cls);
+	str->setValue(value);
+	memory.push_back(str);
+	return memory.size() - 1;
+}
+
+uint32_t Memory::allocateArray(Class * cls, uint32_t length)
+{
+	ArrayObject * o = new ArrayObject(cls, length);
+	memory.push_back(o);
+	return memory.size() - 1;
+}

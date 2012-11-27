@@ -22,15 +22,15 @@ public:
 	uint16_t nextShort();
 	
 	const char * code;
+	ConstantPool * constants;
+	uint32_t programCounter;
 	
 private:
-	uint32_t programCounter;
 	uint32_t localCount;
 	uint32_t * locals;
 	uint32_t stack[MAX_STACK];
 	uint32_t stackPointer;
 	StackFrame * parent;
-	ConstantPool * constants;
 };
 
 #endif // STACKFRAME_H

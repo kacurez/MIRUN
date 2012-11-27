@@ -7,9 +7,15 @@ using namespace std;
 
 ClassLoader::ClassLoader(const char * folder): folder(folder), file(), classTable()
 {
-	Class * number = new Class(INT_CLASS);
-	number->setFieldCount(1);
-	classTable[INT_CLASS] = number;
+	Class * integer = new Class(INT_CLASS);
+	integer->setFieldCount(1);
+	classTable[INT_CLASS] = integer;
+	Class * real = new Class(REAL_CLASS);
+	classTable[REAL_CLASS] = real;
+	Class * str = new Class(STRING_CLASS);
+	classTable[STRING_CLASS] = str;
+	Class * array = new Class(ARRAY_CLASS);
+	classTable[ARRAY_CLASS] = str;
 }
 
 ClassLoader::~ClassLoader()

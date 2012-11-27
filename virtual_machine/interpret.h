@@ -20,14 +20,15 @@ private:
 	void doIntAritmetics(Object * op1, Object * op2, INSTRUCTION i);
 	void addConst(int c);
 	void callMethod(Class * cls, Method * m);
+	void doJump();
 	Object * fetchObject();
-	bool checkNumber(Object * o) const;
+	int32_t fetchInteger();
+	void checkNumber(Object * o) const;
+	void checkInteger(Object * o) const;
 
 	StackFrame * currentFrame;
 	ClassLoader * classLoader;
 	Memory * heap;
-	Class * currentClass;
-	
 };
 
 #endif // INTERPRET_H

@@ -37,16 +37,35 @@ struct RealConst: public ConstPoolStruct
 	double value;
 };
 
+class ConstPoolItem 
+{
+public:
+	ConstPoolItem(ConstPoolTag type, ConstPoolStruct * data);
+	~ConstPoolItem();
+	ConstPoolTag getType() const;
+	int getIntValue() const;
+	double getRealValue() const;
+	const char * getStringValue() const;
+	uint8_t getParam() const;
+	
+private:
+	ConstPoolTag  type;
+	int intValue;
+	double realValue;
+	char * string;
+	uint8_t param;
+};
+
 class ConstantPool
 {
 public:
 	ConstantPool();
 	~ConstantPool();
 	void addItem(ConstPoolStruct * item, ConstPoolTag type);
+	ConstPoolItem * getItem(unsigned int i) const;
 
 private:
-	std::vector<ConstPoolStruct *> pool;
-	std::vector<ConstPoolTag> poolType;
+	std::vector<ConstPoolItem *> pool;
 };
 
 #endif // CONSTANTPOOL_H

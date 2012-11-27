@@ -1,6 +1,6 @@
 #include "class.h"
 
-Class::Class(const char * name): name(name)
+Class::Class(const char * name): name(name), fieldCount(0)
 {
 	//ctor
 }

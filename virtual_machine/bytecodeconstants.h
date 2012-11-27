@@ -4,6 +4,8 @@
 #define IDENTIFIER_LENGTH 25
 #define INT_CLASS "int"
 #define REAL_CLASS "real"
+#define STRING_CLASS "string"
+#define ARRAY_CLASS "array"
 
 enum ConstPoolTag
 {
