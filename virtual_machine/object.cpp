@@ -30,7 +30,28 @@ uint32_t Object::getValue(uint8_t field) const
 	return fields[field];
 }
 
-const Class * Object::getType() const
+Class * Object::getType() const
 {
 	return type;
 }
+
+double DoubleObject::getValue() const
+{
+	return value;
+}
+
+void DoubleObject::setValue(double value)
+{
+	this->value = value;
+}
+
+DoubleObject::~DoubleObject()
+{
+
+}
+
+DoubleObject::DoubleObject(Class * type): Object(type), value(0)
+{
+
+}
+

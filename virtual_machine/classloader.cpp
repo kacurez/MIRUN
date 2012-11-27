@@ -7,6 +7,9 @@ using namespace std;
 
 ClassLoader::ClassLoader(const char * folder): folder(folder), file(), classTable()
 {
+	Class * number = new Class(INT_CLASS);
+	number->setFieldCount(1);
+	classTable[INT_CLASS] = number;
 }
 
 ClassLoader::~ClassLoader()
@@ -148,4 +151,3 @@ string ClassLoader::getFileName(const char * className)
 	filename.append("/").append(className).append(".lessie");
 	return filename;
 }
-

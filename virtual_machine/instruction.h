@@ -28,7 +28,7 @@ enum INSTRUCTION  {
 	LOAD_LOCAL,
 	STORE_LOCAL,
 	POP,
-	LENGTH
+	CALL_DYNAMIC
 };
 
 const char * mnemonics[] = {

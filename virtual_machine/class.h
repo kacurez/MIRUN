@@ -19,6 +19,7 @@ public:
 	int getFieldCount() const;
 	void setFieldCount(uint8_t fieldCount);
 	void setConstPool(ConstantPool * pool);
+	ConstantPool * getConstantPool() const;
 	
 private:
 	std::string name;

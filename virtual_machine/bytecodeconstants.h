@@ -2,6 +2,8 @@
 #define BYTECODECONSTANTS_H
 
 #define IDENTIFIER_LENGTH 25
+#define INT_CLASS "int"
+#define REAL_CLASS "real"
 
 enum ConstPoolTag
 {

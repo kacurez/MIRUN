@@ -57,3 +57,7 @@ void Class::setConstPool(ConstantPool * pool)
 	this->pool = pool;
 }
 
+ConstantPool* Class::getConstantPool() const
+{
+	return pool;
+}

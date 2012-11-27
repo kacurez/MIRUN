@@ -4,6 +4,7 @@
 #include "instruction.h"
 #include "stackframe.h"
 #include "classloader.h"
+#include "memory.h"
 
 class Interpret
 {
@@ -14,9 +15,18 @@ public:
 	
 private:
 	int run();
+	void doAritmetics(INSTRUCTION i);
+	void doRealAritmetics(Object * op1, Object * op2, INSTRUCTION i);
+	void doIntAritmetics(Object * op1, Object * op2, INSTRUCTION i);
+	void addConst(int c);
+	void callMethod(Class * cls, Method * m);
+	Object * fetchObject();
+	bool checkNumber(Object * o) const;
 
 	StackFrame * currentFrame;
 	ClassLoader * classLoader;
+	Memory * heap;
+	Class * currentClass;
 	
 };
 
