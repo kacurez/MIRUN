@@ -191,6 +191,28 @@ int Interpret::run()
 			case POP:
 				currentFrame->pop();
 				break;
+			case LOAD_ARRAY:
+			{
+				Object * o = fetchObject();
+				if(o->getType() != classLoader->getClass(ARRAY_CLASS))
+				{
+					throw "Not an array.";
+				}
+				uint32_t index = fetchInteger();
+				currentFrame->push(((ArrayObject *) o)->getValue(index));
+				break;
+			}
+			case STORE_ARRAY:
+			{
+				Object * o = fetchObject();
+				if(o->getType() != classLoader->getClass(ARRAY_CLASS))
+				{
+					throw "Not an array.";
+				}
+				uint32_t index = fetchInteger();
+				((ArrayObject *) o)->setValue(index, currentFrame->pop());
+				break;
+			}
 			default: 
 				throw "Invalid bytecode.";
 		}

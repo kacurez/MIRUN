@@ -34,7 +34,9 @@ enum INSTRUCTION  {
 	LOAD_LOCAL,
 	STORE_LOCAL,
 	POP,
-	CALL_DYNAMIC
+	CALL_DYNAMIC,
+	LOAD_ARRAY,
+	STORE_ARRAY
 };
 
 const char * mnemonics[] = {
@@ -63,6 +65,9 @@ const char * mnemonics[] = {
 	"STORE",
 	"LOAD_LOCAL",
 	"STORE_LOCAL",
-	"POP"
+	"POP",
+	"CALL_DYNAMIC",
+	"LOAD_ARRAY",
+	"STORE_ARRAY"
 };
 #endif
