@@ -38,7 +38,7 @@ enum INSTRUCTION  {
 	LOAD_ARRAY,
 	STORE_ARRAY
 };
-
+/*
 const char * mnemonics[] = {
 	"ADD",
 	"SUB",
@@ -69,5 +69,5 @@ const char * mnemonics[] = {
 	"CALL_DYNAMIC",
 	"LOAD_ARRAY",
 	"STORE_ARRAY"
-};
+};*/
 #endif

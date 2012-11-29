@@ -12,6 +12,7 @@ public:
 	Interpret(ClassLoader * classLoader);
 	~Interpret();
 	int run(const char * className, const char * methodName);
+	int run(Class * cls, const char * methodName);
 	
 private:
 	int run();

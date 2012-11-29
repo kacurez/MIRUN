@@ -19,9 +19,17 @@ int Interpret::run(const char * className, const char * methodName)
 	return run();
 }
 
+int Interpret::run(Class * cls, const char * methodName)
+{
+	Method * m = cls->getMethod(methodName);
+	currentFrame = new StackFrame(m->getLocals(), m->getCode(), cls->getConstantPool());
+	return run();
+}
+
 int Interpret::run()
 {
-	while(1)
+	uint32_t returnValue = -1;
+	while(currentFrame)
 	{
 		INSTRUCTION i = (INSTRUCTION)currentFrame->nextByte();
 		switch(i)
@@ -99,7 +107,13 @@ int Interpret::run()
 			case RET:
 			{
 				uint32_t retValue = currentFrame->pop();
-				currentFrame->getParent()->push(retValue);
+				if(currentFrame->getParent())
+				{
+					currentFrame->getParent()->push(retValue);
+				} else
+				{
+					returnValue = retValue;
+				}
 			}
 			case RET_VOID:
 			{
@@ -217,6 +231,15 @@ int Interpret::run()
 				throw "Invalid bytecode.";
 		}
 	}
+	if(returnValue != -1)
+	{
+		Object * o = heap->getObject(returnValue);
+		if(o->getType() == classLoader->getClass(INT_CLASS))
+		{
+			return o->getValue(0);
+		}
+	}
+	return 0;
 }
 
 Object * Interpret::fetchObject()
@@ -316,7 +339,7 @@ void Interpret::doIntAritmetics(Object * op1, Object *  op2, INSTRUCTION i)
 		default:
 			throw "unreachable.";
 	}
-	currentFrame->push(heap->allocateNumber(classLoader->getClass(REAL_CLASS), result));
+	currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), result));
 }
 
 void Interpret::addConst(int c)

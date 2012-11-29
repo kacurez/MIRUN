@@ -147,6 +147,11 @@ ConstantPool * ClassLoader::loadConstantPool()
 				throw 10;
 		}
 		pool->addItem(item, (ConstPoolTag) type);
+		if(type == STRING_CONST)
+		{
+			delete [] (((StringConst *) item)->value);
+		}
+		delete item;
 	}
 	return pool;
 }
