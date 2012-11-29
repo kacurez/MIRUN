@@ -19,11 +19,14 @@ public:
 	uint32_t allocateNumber(Class * cls, double value);
 	uint32_t allocateString(Class * cls, const char * value);
 	uint32_t allocateArray(Class * cls, uint32_t length);
+	double getDoubleValue(uint32_t ref) const;
+	const char * getStringValue(uint32_t ref) const;
 
 private:
 	std::vector<Object *> memory;
 	std::map<int, uint32_t> ints;
-	std::map<double, uint32_t> doubles;
+	std::vector<double> doubles;
+	std::vector<char *> strings;
 };
 
 #endif // MEMORY_H

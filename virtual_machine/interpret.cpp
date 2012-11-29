@@ -199,7 +199,7 @@ int Interpret::run()
 					throw "Not an array.";
 				}
 				uint32_t index = fetchInteger();
-				currentFrame->push(((ArrayObject *) o)->getValue(index));
+				currentFrame->push(o->getValue(index));
 				break;
 			}
 			case STORE_ARRAY:
@@ -210,7 +210,7 @@ int Interpret::run()
 					throw "Not an array.";
 				}
 				uint32_t index = fetchInteger();
-				((ArrayObject *) o)->setValue(index, currentFrame->pop());
+				o->setValue(index, currentFrame->pop());
 				break;
 			}
 			default: 
@@ -265,14 +265,14 @@ void Interpret::doRealAritmetics(Object * op1, Object *  op2, INSTRUCTION i)
 		left = op1->getValue(0);
 	} else
 	{
-		left = ((DoubleObject *) op1)->getValue();
+		left = heap->getDoubleValue(op1->getValue(0));
 	}
 	if(op2->getType() == classLoader->getClass(INT_CLASS))
 	{
 		right = op2->getValue(0);
 	} else
 	{
-		right = ((DoubleObject *) op2)->getValue();
+		right = heap->getDoubleValue(op2->getValue(0));
 	}
 	switch(i)
 	{

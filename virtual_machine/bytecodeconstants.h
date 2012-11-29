@@ -6,6 +6,7 @@
 #define REAL_CLASS "real"
 #define STRING_CLASS "string"
 #define ARRAY_CLASS "array"
+#define FILE_CLASS "file"
 
 enum ConstPoolTag
 {

@@ -11,11 +11,13 @@ ClassLoader::ClassLoader(const char * folder): folder(folder), file(), classTabl
 	integer->setFieldCount(1);
 	classTable[INT_CLASS] = integer;
 	Class * real = new Class(REAL_CLASS);
+	real->setFieldCount(1);
 	classTable[REAL_CLASS] = real;
-	Class * str = new Class(STRING_CLASS);
-	classTable[STRING_CLASS] = str;
-	Class * array = new Class(ARRAY_CLASS);
-	classTable[ARRAY_CLASS] = str;
+	Class * string = new Class(STRING_CLASS);
+	string->setFieldCount(2);
+	classTable[STRING_CLASS] = string;
+	classTable[ARRAY_CLASS] = new Class(ARRAY_CLASS);
+	classTable[FILE_CLASS] = new Class(FILE_CLASS);
 }
 
 ClassLoader::~ClassLoader()
