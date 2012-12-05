@@ -23,6 +23,7 @@ private:
 	Method * loadMethod();
 	ConstantPool * loadConstantPool();
 	std::string getFileName(const char * className);
+	void initBuiltInClasses();
 
 	std::string folder;
 	std::fstream file;

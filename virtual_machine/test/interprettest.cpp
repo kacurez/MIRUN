@@ -241,6 +241,29 @@ void InterpretTest::localsTest()
 	assert(50 == instance.run(cls->getName().c_str(), m->getName().c_str()));
 }
 
+void InterpretTest::nativeTest()
+{
+	ConstantPool * pool = new ConstantPool();
+	Class * cls = initClass("NativeTest", pool);
+	const char code[] = 
+	{
+		PUSH, 0x00, 0x00,
+		CALL, 0x01, 0x00, 0x00,
+		RET_VOID
+	};
+	Method * m = initMethod("nativeTest", code, sizeof(code), 0, 2, 0);
+	ClassLoader cl("");
+	Interpret instance(&cl);
+	IntConst i;
+	i.value = 20;
+	pool->addItem(&i, INT_CONST);//0
+	ClassRef cr;
+	sprintf(cr.name, "%s", CONSOLE_CLASS);//1
+	pool->addItem(&cr, CLASS_REF);
+	cls->addMethod(m);
+	cl.addClass(cls);
+	instance.run(cls->getName().c_str(), m->getName().c_str());
+}
 Method * InterpretTest::initMethod(const char * name, const char * code, int codeLength, int paramCount, int locals, int flag)
 {
 	Method * m = new Method(name);

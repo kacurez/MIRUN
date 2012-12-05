@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <map>
+#include <fstream>
 #include "object.h"
 
 class Memory
@@ -21,12 +22,15 @@ public:
 	uint32_t allocateArray(Class * cls, uint32_t length);
 	double getDoubleValue(uint32_t ref) const;
 	const char * getStringValue(uint32_t ref) const;
+	uint32_t createFile(const char * fileName);
+	std::fstream * getFileStream(uint32_t file);
 
 private:
 	std::vector<Object *> memory;
 	std::map<int, uint32_t> ints;
 	std::vector<double> doubles;
 	std::vector<char *> strings;
+	std::vector<std::fstream *> files;
 };
 
 #endif // MEMORY_H

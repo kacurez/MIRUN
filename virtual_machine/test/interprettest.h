@@ -13,6 +13,7 @@ public:
 	void callTest();
 	void callDynamicTest();
 	void localsTest();
+	void nativeTest();
 	
 private:
 	Method * initMethod(const char * name, const char * code, int codeLength, int paramCount, int locals, int flag);

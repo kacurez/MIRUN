@@ -21,7 +21,7 @@ int Interpret::run(const char * className, const char * methodName)
 
 int Interpret::run()
 {
-	uint32_t returnValue = -1;
+	uint32_t returnValue = VM_NULL;
 	while(currentFrame)
 	{
 		INSTRUCTION i = (INSTRUCTION)currentFrame->nextByte();
@@ -209,7 +209,7 @@ int Interpret::run()
 				throw "Invalid bytecode.";
 		}
 	}
-	if(returnValue != -1)
+	if(returnValue != VM_NULL)
 	{
 		Object * o = heap->getObject(returnValue);
 		if(o->getType() == classLoader->getClass(INT_CLASS))
@@ -329,12 +329,27 @@ void Interpret::addConst(int c)
 
 void Interpret::callMethod(Class * cls, Method * m)
 {
-	StackFrame * nextFrame = new StackFrame(m->getLocals() + m->getParamCount(), m->getCode(), cls->getConstantPool(), currentFrame);
-	for(int i = 0; i < m->getParamCount(); i ++)
+	if(m->isNative())
 	{
-		nextFrame->setLocal(i, currentFrame->pop());
+		NativeMethod * nm = dynamic_cast<NativeMethod *>(m);
+		for(int i = 0; i < m->getParamCount(); i ++)
+		{
+			nm->setParam(i, currentFrame->pop());
+		}
+		uint32_t ret = nm->run(heap);
+		if(ret != VM_NULL)
+		{
+			currentFrame->push(ret);
+		}
+	} else
+	{
+		StackFrame * nextFrame = new StackFrame(m->getLocals() + m->getParamCount(), m->getCode(), cls->getConstantPool(), currentFrame);
+		for(int i = 0; i < m->getParamCount(); i ++)
+		{
+			nextFrame->setLocal(i, currentFrame->pop());
+		}
+		currentFrame = nextFrame;
 	}
-	currentFrame = nextFrame;
 }
 
 void Interpret::doJump(bool cond)

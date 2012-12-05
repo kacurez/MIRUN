@@ -2,22 +2,13 @@
 #include <inttypes.h>
 #include <iostream>
 #include "bytecodeconstants.h"
+#include "nativemethods.cpp"
 
 using namespace std;
 
 ClassLoader::ClassLoader(const char * folder): folder(folder), file(), classTable()
 {
-	Class * integer = new Class(INT_CLASS);
-	integer->setFieldCount(1);
-	classTable[INT_CLASS] = integer;
-	Class * real = new Class(REAL_CLASS);
-	real->setFieldCount(1);
-	classTable[REAL_CLASS] = real;
-	Class * string = new Class(STRING_CLASS);
-	string->setFieldCount(2);
-	classTable[STRING_CLASS] = string;
-	classTable[ARRAY_CLASS] = new Class(ARRAY_CLASS);
-	classTable[FILE_CLASS] = new Class(FILE_CLASS);
+	initBuiltInClasses();
 }
 
 ClassLoader::~ClassLoader()
@@ -170,4 +161,31 @@ void ClassLoader::addClass(Class * c)
 	classTable[c->getName()] = c;
 }
 
+void ClassLoader::initBuiltInClasses()
+{
+	classTable[INT_CLASS] = new Class(INT_CLASS);
+	classTable[INT_CLASS]->setFieldCount(1);
 
+	classTable[REAL_CLASS] = new Class(REAL_CLASS);
+	classTable[REAL_CLASS]->setFieldCount(1);
+	
+	classTable[STRING_CLASS] = new Class(STRING_CLASS);
+	classTable[STRING_CLASS]->setFieldCount(2);
+	
+	classTable[ARRAY_CLASS] = new Class(ARRAY_CLASS);
+	
+	classTable[FILE_CLASS] = new Class(FILE_CLASS);
+	classTable[FILE_CLASS]->setFieldCount(1);
+	classTable[FILE_CLASS]->addMethod(new FileOpen());
+	classTable[FILE_CLASS]->addMethod(new FileClose());
+	classTable[FILE_CLASS]->addMethod(new FileWrite());
+	classTable[FILE_CLASS]->addMethod(new FileReadLine(classTable[STRING_CLASS]));
+	classTable[FILE_CLASS]->addMethod(new FileReadInt(classTable[INT_CLASS]));
+	classTable[FILE_CLASS]->addMethod(new FileReadReal(classTable[REAL_CLASS]));
+	
+	classTable[CONSOLE_CLASS] = new Class(CONSOLE_CLASS);
+	classTable[CONSOLE_CLASS]->addMethod(new Print());
+	classTable[CONSOLE_CLASS]->addMethod(new ReadLine(classTable[STRING_CLASS]));
+	classTable[CONSOLE_CLASS]->addMethod(new ReadInt(classTable[INT_CLASS]));
+	classTable[CONSOLE_CLASS]->addMethod(new ReadReal(classTable[REAL_CLASS]));
+}

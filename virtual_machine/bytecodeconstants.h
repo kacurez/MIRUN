@@ -7,6 +7,8 @@
 #define STRING_CLASS "string"
 #define ARRAY_CLASS "array"
 #define FILE_CLASS "file"
+#define CONSOLE_CLASS "console"
+#define VM_NULL  0xffffffff
 
 enum ConstPoolTag
 {

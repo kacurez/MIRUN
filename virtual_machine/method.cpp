@@ -62,3 +62,37 @@ std::string Method::debugString() const
 	return ss.str();
 }
 
+void NativeMethod::setParam(uint8_t param, uint32_t value)
+{
+	if(param >= paramCount)
+	{
+		throw "No such parameter.";
+	}
+	params[param] = value;
+}
+
+NativeMethod::~NativeMethod()
+{
+	delete params;
+}
+
+NativeMethod::NativeMethod(const char * name): Method(name), params(0)
+{
+	flag = NATIVE_METHOD;
+}
+
+void NativeMethod::setParamCount(uint8_t val)
+{
+	Method::setParamCount(val);
+	params = new uint32_t[paramCount];
+}
+
+uint8_t Method::getFlag() const
+{
+	return flag;
+}
+
+bool Method::isNative() const
+{
+	return (flag & 0x02);
+}

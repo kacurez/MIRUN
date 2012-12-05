@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Memory::Memory(): memory(), ints(), doubles(), strings()
+Memory::Memory(): memory(), ints(), doubles(), strings(), files()
 {
 	//ctor
 }
@@ -23,6 +23,12 @@ Memory::~Memory()
 		delete [] (*it);
 	}
 	strings.clear();
+	for(vector<fstream *>::iterator it = files.begin(); it < files.end(); it ++)
+	{
+		(*it)->close();
+		delete [] (*it);
+	}
+	files.clear();
 }
 
 uint32_t Memory::allocate(Class * cls)
@@ -108,4 +114,26 @@ double Memory::getDoubleValue(uint32_t ref) const
 	return doubles[ref];
 }
 
+fstream * Memory::getFileStream(uint32_t file)
+{
+	if(file >= doubles.size())
+	{
+		throw "No such file descriptor.";
+	}
+	return files[file];
+}
 
+uint32_t Memory::createFile(const char * fileName)
+{
+	fstream * file = new fstream;
+	file->open(fileName,  ios::in | ios::out | ios::binary);
+	if(file->is_open())
+	{
+		files.push_back(file);
+		return files.size() - 1;
+	} else 
+	{
+		delete file;
+		return VM_NULL;
+	}
+}
