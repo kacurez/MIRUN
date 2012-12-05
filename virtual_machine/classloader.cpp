@@ -144,7 +144,7 @@ ConstantPool * ClassLoader::loadConstantPool()
 				break;
 			}
 			default:
-				throw 10;
+				throw "Invalid class file.";
 		}
 		pool->addItem(item, (ConstPoolTag) type);
 		if(type == STRING_CONST)
@@ -164,3 +164,10 @@ string ClassLoader::getFileName(const char * className)
 	filename.append("/").append(className).append(".lessie");
 	return filename;
 }
+
+void ClassLoader::addClass(Class * c)
+{
+	classTable[c->getName()] = c;
+}
+
+

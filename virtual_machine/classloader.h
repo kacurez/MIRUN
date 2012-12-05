@@ -16,6 +16,7 @@ public:
 	ClassLoader(const char * folder);
 	~ClassLoader();
 	Class * getClass(const char * className);
+	void addClass(Class * c);
 
 private:
 	Class * loadClass(const char * className);

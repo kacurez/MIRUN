@@ -36,7 +36,8 @@ enum INSTRUCTION  {
 	POP,
 	CALL_DYNAMIC,
 	LOAD_ARRAY,
-	STORE_ARRAY
+	STORE_ARRAY,
+	DUP
 };
 /*
 const char * mnemonics[] = {

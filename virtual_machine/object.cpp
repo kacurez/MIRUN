@@ -16,7 +16,7 @@ void Object::setValue(uint32_t field, uint32_t value)
 {
 	if(field >= fieldCount)
 	{
-		throw 5;
+		throw "No such field.";
 	}
 	fields[field] = value;
 }
@@ -25,7 +25,7 @@ uint32_t Object::getValue(uint32_t field) const
 {
 	if(field >= fieldCount)
 	{
-		throw 5;
+		throw "No such field.";
 	}
 	return fields[field];
 }

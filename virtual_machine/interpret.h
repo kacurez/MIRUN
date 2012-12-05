@@ -12,7 +12,6 @@ public:
 	Interpret(ClassLoader * classLoader);
 	~Interpret();
 	int run(const char * className, const char * methodName);
-	int run(Class * cls, const char * methodName);
 	
 private:
 	int run();
@@ -21,7 +20,7 @@ private:
 	void doIntAritmetics(Object * op1, Object * op2, INSTRUCTION i);
 	void addConst(int c);
 	void callMethod(Class * cls, Method * m);
-	void doJump();
+	void doJump(bool cond = true);
 	Object * fetchObject();
 	int32_t fetchInteger();
 	void checkNumber(Object * o) const;

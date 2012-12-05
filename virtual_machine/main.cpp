@@ -6,8 +6,16 @@ using namespace std;
 
 int main()
 {
-    ClassLoader cl("data");
-    cl.getClass("MyClass");
-    InterpretTest test;
-    test.aritmeticTest();
+	try {
+		ClassLoader cl("data");
+		cl.getClass("MyClass");
+		InterpretTest test;
+		test.aritmeticTest();
+		test.jumpTest();
+		test.callTest();
+		test.callDynamicTest();
+	} catch(const char * ex)
+	{
+		cout << "Program terminated: " << ex << endl;
+	}
 }

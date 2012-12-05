@@ -62,6 +62,7 @@ uint32_t Memory::allocateNumber(Class * cls, int32_t value)
 		uint32_t ptr = allocate(cls);
 		Object * o = getObject(ptr);
 		o->setValue(0, value);
+		ints[value] = ptr;
 		return ptr;
 	} else
 	{

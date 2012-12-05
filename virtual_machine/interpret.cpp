@@ -19,13 +19,6 @@ int Interpret::run(const char * className, const char * methodName)
 	return run();
 }
 
-int Interpret::run(Class * cls, const char * methodName)
-{
-	Method * m = cls->getMethod(methodName);
-	currentFrame = new StackFrame(m->getLocals(), m->getCode(), cls->getConstantPool());
-	return run();
-}
-
 int Interpret::run()
 {
 	uint32_t returnValue = -1;
@@ -89,7 +82,7 @@ int Interpret::run()
 			}
 			case CALL_DYNAMIC:
 			{
-				Class * c = fetchObject()->getType();
+				Class * c = heap->getObject(currentFrame->top())->getType();
 				uint16_t methodNamePtr = currentFrame->nextShort();
 				ConstPoolItem * i = currentFrame->constants->getItem(methodNamePtr);
 				assert(i->getType() == METHOD_REF);
@@ -123,40 +116,22 @@ int Interpret::run()
 				break;
 			}
 			case IF_EQ:
-				if(fetchInteger() == 0)
-				{
-					doJump();
-				}
+				doJump(fetchInteger() == 0);
 				break;
 			case IF_GT:
-				if(fetchInteger() > 0)
-				{
-					doJump();
-				}
+				doJump(fetchInteger() > 0);
 				break;
 			case IF_LT:
-				if(fetchInteger() < 0)
-				{
-					doJump();
-				}
+				doJump(fetchInteger() < 0);
 				break;
 			case IF_GE:
-				if(fetchInteger() >= 0)
-				{
-					doJump();
-				}
+				doJump(fetchInteger() >= 0);
 				break;
 			case IF_LE:
-				if(fetchInteger() <= 0)
-				{
-					doJump();
-				}
+				doJump(fetchInteger() <= 0);
 				break;
 			case IF_NE:
-				if(fetchInteger() != 0)
-				{
-					doJump();
-				}
+				doJump(fetchInteger() != 0);
 				break;
 			case PUSH:
 			{
@@ -227,6 +202,9 @@ int Interpret::run()
 				o->setValue(index, currentFrame->pop());
 				break;
 			}
+			case DUP:
+				currentFrame->push(currentFrame->top());
+				break;
 			default: 
 				throw "Invalid bytecode.";
 		}
@@ -351,7 +329,7 @@ void Interpret::addConst(int c)
 
 void Interpret::callMethod(Class * cls, Method * m)
 {
-	StackFrame * nextFrame = new StackFrame(m->getLocals(), m->getCode(), cls->getConstantPool(), currentFrame);
+	StackFrame * nextFrame = new StackFrame(m->getLocals() + m->getParamCount(), m->getCode(), cls->getConstantPool(), currentFrame);
 	for(int i = 0; i < m->getParamCount(); i ++)
 	{
 		nextFrame->setLocal(i, currentFrame->pop());
@@ -359,10 +337,13 @@ void Interpret::callMethod(Class * cls, Method * m)
 	currentFrame = nextFrame;
 }
 
-void Interpret::doJump()
+void Interpret::doJump(bool cond)
 {
-	int8_t offset = currentFrame->nextShort();
-	currentFrame->programCounter += offset;
+	int8_t offset = currentFrame->nextByte();
+	if(cond)
+	{
+		currentFrame->programCounter += offset;
+	}
 }
 
 int32_t Interpret::fetchInteger()

@@ -14,7 +14,7 @@ uint32_t StackFrame::pop()
 {
 	if(stackPointer == 0)
 	{
-		throw 1;
+		throw "Stack underflow.";
 	}
 	return stack[-- stackPointer];
 }
@@ -23,7 +23,7 @@ uint32_t StackFrame::top() const
 {
 	if(stackPointer == 0)
 	{
-		throw 1;
+		throw "Stack underflow.";
 	}
 	return stack[stackPointer - 1];
 }
@@ -32,7 +32,7 @@ void StackFrame::push(uint32_t item)
 {
 	if(stackPointer == MAX_STACK - 1)
 	{
-		throw 1;
+		throw "Stack overflow.";
 	}
 	stack[stackPointer ++] = item;
 }
@@ -44,7 +44,7 @@ void StackFrame::storeLocal(uint32_t index)
 		locals[index] = pop();
 	} else 
 	{
-		throw 1;
+		throw "No such local.";
 	}
 }
 
@@ -55,7 +55,7 @@ void StackFrame::pushLocal(uint32_t index)
 		push(locals[index]);
 	} else
 	{
-		throw 1;
+		throw "No such local.";
 	}
 }
 
