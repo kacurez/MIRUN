@@ -12,6 +12,7 @@ public:
 	void jumpTest();
 	void callTest();
 	void callDynamicTest();
+	void localsTest();
 	
 private:
 	Method * initMethod(const char * name, const char * code, int codeLength, int paramCount, int locals, int flag);

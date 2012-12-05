@@ -213,6 +213,34 @@ void InterpretTest::callDynamicTest()
 	assert(3 == instance.run(cls->getName().c_str(), m->getName().c_str()));
 }
 
+void InterpretTest::localsTest()
+{
+	ConstantPool * pool = new ConstantPool();
+	Class * cls = initClass("LocalsTest", pool);
+	const char code[] = 
+	{
+		PUSH, 0x00, 0x00,
+		STORE_LOCAL, 0x00,
+		PUSH, 0x01, 0x00,
+		STORE_LOCAL, 0x01,
+		LOAD_LOCAL, 0x00,
+		LOAD_LOCAL, 0x01,
+		ADD,
+		RET
+	};
+	Method * m = initMethod("localsTest", code, sizeof(code), 0, 2, 0);
+	ClassLoader cl("");
+	Interpret instance(&cl);
+	IntConst i;
+	i.value = 20;
+	pool->addItem(&i, INT_CONST);
+	i.value = 30;
+	pool->addItem(&i, INT_CONST);
+	cls->addMethod(m);
+	cl.addClass(cls);
+	assert(50 == instance.run(cls->getName().c_str(), m->getName().c_str()));
+}
+
 Method * InterpretTest::initMethod(const char * name, const char * code, int codeLength, int paramCount, int locals, int flag)
 {
 	Method * m = new Method(name);
