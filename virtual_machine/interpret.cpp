@@ -35,18 +35,18 @@ int Interpret::run()
 				break;
 			case CMP_EQ:
 			{
-				int32_t res = currentFrame->pop() - currentFrame->pop();
-				currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), res));
+				int res = currentFrame->pop() - currentFrame->pop();
+				currentFrame->push(allocateNumber(res));
 				break;
 			}
 			case CMP_NE:
 			{
 				if(currentFrame->pop() != currentFrame->pop())
 				{
-					currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), 0));
+					currentFrame->push(allocateNumber(0));
 				} else
 				{
-					currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), 1));
+					currentFrame->push(allocateNumber(1));
 				}
 				break;
 			}
@@ -61,7 +61,7 @@ int Interpret::run()
 				uint16_t classNamePtr = currentFrame->nextShort();
 				ConstPoolItem * i = currentFrame->constants->getItem(classNamePtr);
 				assert(i->getType() == CLASS_REF);
-				currentFrame->push(heap->allocate(classLoader->getClass(i->getStringValue())));
+				currentFrame->push(allocate(classLoader->getClass(i->getStringValue())));
 				break;
 			}	
 			case NEW_ARRAY:
@@ -140,13 +140,13 @@ int Interpret::run()
 				switch(item->getType())
 				{
 					case INT_CONST:
-						currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), item->getIntValue()));
+						currentFrame->push(allocateNumber(item->getIntValue()));
 						break;
 					case REAL_CONST:
-						currentFrame->push(heap->allocateNumber(classLoader->getClass(REAL_CLASS), item->getRealValue()));
+						currentFrame->push(allocateNumber(item->getRealValue()));
 						break;
 					case STRING_CONST:
-						currentFrame->push(heap->allocateString(classLoader->getClass(STRING_CLASS), item->getStringValue()));
+						currentFrame->push(allocateString(item->getStringValue()));
 						break;
 					default:
 						throw "Not a constant.";
@@ -292,7 +292,7 @@ void Interpret::doRealAritmetics(Object * op1, Object *  op2, INSTRUCTION i)
 		default:
 			throw "unreachable.";
 	}
-	currentFrame->push(heap->allocateNumber(classLoader->getClass(REAL_CLASS), result));
+	currentFrame->push(allocateNumber(result));
 }
 
 void Interpret::doIntAritmetics(Object * op1, Object *  op2, INSTRUCTION i)
@@ -317,14 +317,14 @@ void Interpret::doIntAritmetics(Object * op1, Object *  op2, INSTRUCTION i)
 		default:
 			throw "unreachable.";
 	}
-	currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), result));
+	currentFrame->push(allocateNumber(result));
 }
 
 void Interpret::addConst(int c)
 {
 	Object * o = fetchObject();
 	checkInteger(o);
-	currentFrame->push(heap->allocateNumber(classLoader->getClass(INT_CLASS), (int32_t)(o->getValue(0)) + c));
+	currentFrame->push(allocateNumber((int)(o->getValue(0)) + c));
 }
 
 void Interpret::callMethod(Class * cls, Method * m)
@@ -367,3 +367,64 @@ int32_t Interpret::fetchInteger()
 	checkInteger(o);
 	return o->getValue(0);
 }
+
+uint32_t Interpret::allocateString(const char * value)
+{
+	uint32_t ptr = heap->allocateString(classLoader->getClass(STRING_CLASS), value);
+	if(ptr == VM_NULL)
+	{
+		heap->gc(currentFrame);
+		ptr = heap->allocateString(classLoader->getClass(STRING_CLASS), value);
+		if(ptr == VM_NULL)
+		{
+			throw "Out of memory.";
+		}
+	}
+	return ptr;
+}
+
+uint32_t Interpret::allocate(Class * cls)
+{
+	uint32_t ptr = heap->allocate(cls);
+	if(ptr == VM_NULL)
+	{
+		heap->gc(currentFrame);
+		ptr = heap->allocate(cls);
+		if(ptr == VM_NULL)
+		{
+			throw "Out of memory.";
+		}
+	}
+	return ptr;
+}
+
+uint32_t Interpret::allocateNumber(int value)
+{
+	uint32_t ptr = heap->allocateNumber(classLoader->getClass(INT_CLASS), value);
+	if(ptr == VM_NULL)
+	{
+		heap->gc(currentFrame);
+		ptr = heap->allocateNumber(classLoader->getClass(INT_CLASS), value);
+		if(ptr == VM_NULL)
+		{
+			throw "Out of memory.";
+		}
+	}
+	return ptr;
+}
+
+uint32_t Interpret::allocateNumber(double value)
+{
+	uint32_t ptr = heap->allocateNumber(classLoader->getClass(REAL_CLASS), value);
+	if(ptr == VM_NULL)
+	{
+		heap->gc(currentFrame);
+		ptr = heap->allocateNumber(classLoader->getClass(REAL_CLASS), value);
+		if(ptr == VM_NULL)
+		{
+			throw "Out of memory.";
+		}
+	}
+	return ptr;
+}
+

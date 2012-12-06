@@ -8,6 +8,29 @@
 #include <map>
 #include <fstream>
 #include "object.h"
+#include "stackframe.h"
+
+template<class T> class Page
+{
+public:
+	Page(T used, T empty, uint32_t maxSize): used(used), empty(empty), size(0), maxSize(maxSize) {}
+	
+	~Page()
+	{
+		delete [] used;
+		delete [] empty;
+	}
+	
+	bool isSpace(uint32_t requested = 1) const
+	{
+		return requested + size < maxSize;
+	}
+	
+	T used;
+	T empty;
+	uint32_t size;
+	uint32_t maxSize;
+};
 
 class Memory
 {
@@ -24,13 +47,18 @@ public:
 	const char * getStringValue(uint32_t ref) const;
 	uint32_t createFile(const char * fileName);
 	std::fstream * getFileStream(uint32_t file);
+	void gc(StackFrame * stack);
 
 private:
-	std::vector<Object *> memory;
+	Page<Object *> memory;
+	Page<uint32_t *> fields;
 	std::map<int, uint32_t> ints;
-	std::vector<double> doubles;
+	Page<double *> doubles;
 	std::vector<char *> strings;
 	std::vector<std::fstream *> files;
+	
+	uint32_t moveObject(uint32_t ptr);
+	
 };
 
 #endif // MEMORY_H

@@ -20,6 +20,9 @@ public:
 	void setLocal(uint32_t index, uint32_t item);
 	uint8_t nextByte();
 	uint16_t nextShort();
+	uint32_t size() const;
+	uint32_t getValueAt(uint32_t index) const;
+	void setValueAt(uint32_t index, uint32_t value);
 	
 	const char * code;
 	ConstantPool * constants;

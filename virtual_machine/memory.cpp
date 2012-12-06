@@ -2,22 +2,20 @@
 #include "bytecodeconstants.h"
 #include <string.h>
 
+#define MEMORY_SIZE 5
+#define FIELDS_SIZE 100000
+
 using namespace std;
 
-Memory::Memory(): memory(), ints(), doubles(), strings(), files()
+Memory::Memory(): memory(new Object[MEMORY_SIZE], new Object[MEMORY_SIZE], MEMORY_SIZE), 
+	fields(new uint32_t[FIELDS_SIZE], new uint32_t[FIELDS_SIZE], FIELDS_SIZE), 
+	doubles(new double[MEMORY_SIZE], new double[MEMORY_SIZE], MEMORY_SIZE)
 {
-	//ctor
 }
 
 Memory::~Memory()
 {
-	for(vector<Object *>::iterator it = memory.begin(); it < memory.end(); it ++)
-	{
-		delete (* it);
-	}
-	memory.clear();
 	ints.clear();
-	doubles.clear();
 	for(vector<char *>::iterator it = strings.begin(); it < strings.end(); it ++)
 	{
 		delete [] (*it);
@@ -33,27 +31,45 @@ Memory::~Memory()
 
 uint32_t Memory::allocate(Class * cls)
 {
-	Object * o = new Object(cls);
-	memory.push_back(o);
-	return memory.size() - 1;
+	Object o(cls);
+	uint32_t fieldCount = o.getFieldCount();
+	if(!fields.isSpace(fieldCount) || !memory.isSpace())
+	{
+		return VM_NULL;
+	}
+	if(fieldCount > 0)
+	{
+		o.setFields(fields.used + fields.size);
+		fields.size += fieldCount;
+	}
+	memory.used[memory.size] = o;
+	return memory.size ++;
 }
 
 Object * Memory::getObject(uint32_t pointer) const
 {
-	if(pointer >= memory.size())
+	if(pointer >= memory.size)
 	{
 		throw "Memory violation.";
 	}
-	return memory[pointer];
+	return &(memory.used[pointer]);
 }
 
 uint32_t Memory::allocateNumber(Class * cls, double value)
 {
-	//TODO same number should have same reference
+	if(!doubles.isSpace())
+	{
+		return VM_NULL;
+	}
 	uint32_t ptr = allocate(cls);
+	if(ptr ==VM_NULL)
+	{
+		return ptr;
+	}
 	Object * o = getObject(ptr);
-	doubles.push_back(value);
-	o->setValue(0, doubles.size() - 1);
+	doubles.used[doubles.size] = value;
+	o->setValue(0, doubles.size);
+	doubles.size ++;
 	return ptr;
 }
 
@@ -66,6 +82,10 @@ uint32_t Memory::allocateNumber(Class * cls, int32_t value)
 	if(ints.find(value) == ints.end())
 	{
 		uint32_t ptr = allocate(cls);
+		if(ptr ==VM_NULL)
+		{
+			return ptr;
+		}
 		Object * o = getObject(ptr);
 		o->setValue(0, value);
 		ints[value] = ptr;
@@ -80,6 +100,10 @@ uint32_t Memory::allocateString(Class * cls, const char * value)
 {
 	//TODO intern strings
 	uint32_t ptr = allocate(cls);
+	if(ptr ==VM_NULL)
+	{
+		return ptr;
+	}
 	Object * str = getObject(ptr);
 	int length = strlen(value);
 	char * copy = new char[length];
@@ -91,9 +115,18 @@ uint32_t Memory::allocateString(Class * cls, const char * value)
 
 uint32_t Memory::allocateArray(Class * cls, uint32_t length)
 {
-	Object * o = new Object(cls, length);
-	memory.push_back(o);
-	return memory.size() - 1;
+	if(!fields.isSpace(length) || !memory.isSpace())
+	{
+		return VM_NULL;
+	}
+	Object o(cls, length);
+	if(length > 0)
+	{
+		o.setFields(fields.used + fields.size);
+		fields.size += length;
+	}
+	memory.used[memory.size] = o;
+	return memory.size ++;
 }
 
 const char * Memory::getStringValue(uint32_t ref) const
@@ -107,16 +140,16 @@ const char * Memory::getStringValue(uint32_t ref) const
 
 double Memory::getDoubleValue(uint32_t ref) const
 {
-	if(ref >= doubles.size())
+	if(ref >= doubles.size)
 	{
 		throw "Memory violation.";
 	}
-	return doubles[ref];
+	return doubles.used[ref];
 }
 
 fstream * Memory::getFileStream(uint32_t file)
 {
-	if(file >= doubles.size())
+	if(file >= doubles.size)
 	{
 		throw "No such file descriptor.";
 	}
@@ -136,4 +169,65 @@ uint32_t Memory::createFile(const char * fileName)
 		delete file;
 		return VM_NULL;
 	}
+}
+
+void Memory::gc(StackFrame * stack)
+{
+	StackFrame * sf = stack;
+	memory.size = 0;
+	fields.size = 0;
+	doubles.size = 0;
+	ints.clear();
+	while(sf)
+	{
+		for(unsigned int i = 0; i < sf->size(); i ++)
+		{
+			sf->setValueAt(i, (sf->getValueAt(i)));
+		}
+		sf = sf->getParent();
+	}
+	unsigned int scan = 0;
+	while(scan < memory.size)
+	{
+		Object * o = &(memory.empty[scan]);
+		if(o->getType()->getName() == INT_CLASS)
+		{
+			ints[(int)o->getValue(0)] = scan;
+		} else if(o->getType()->getName() == REAL_CLASS)
+		{
+			doubles.empty[doubles.size] = doubles.used[o->getValue(0)];
+			o->setValue(0, doubles.size);
+			doubles.size ++;
+		} else if(o->getType()->getName() == STRING_CLASS)
+		{
+			
+		} else
+		{
+			for(unsigned int i = 0; i < o->getFieldCount(); i ++)
+			{
+				o->setValue(i, moveObject(o->getValue(i)));
+			}
+		}
+		scan ++;
+	}
+	std::swap(memory.used, memory.empty);
+	std::swap(fields.used, fields.empty);
+	std::swap(doubles.used, doubles.empty);
+}
+
+uint32_t Memory::moveObject(uint32_t ptr)
+{
+	if(memory.used[ptr].address == VM_NULL)
+	{
+		//copy object
+		memory.empty[memory.size] = memory.used[ptr];
+		//alocate fields
+		memory.empty[memory.size].setFields(fields.empty + fields.size);
+		fields.size += memory.used[ptr].getFieldCount();
+		//copy field values
+		memcpy(memory.empty[memory.size].getFields(), memory.used[ptr].getFields(), memory.used[ptr].getFieldCount() * sizeof(uint32_t));
+		//set forward pointer
+		memory.used[ptr].address = memory.size ++;
+	}
+	return memory.used[ptr].address;
 }

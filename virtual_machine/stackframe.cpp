@@ -85,4 +85,17 @@ uint8_t StackFrame::nextByte()
 	return code[programCounter ++];
 }
 
+uint32_t StackFrame::getValueAt(uint32_t index) const
+{
+	return stack[index];
+}
 
+uint32_t StackFrame::size() const
+{
+	return stackPointer;
+}
+
+void StackFrame::setValueAt(uint32_t index, uint32_t value)
+{
+	stack[index] = value;
+}

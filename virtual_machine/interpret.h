@@ -25,6 +25,10 @@ private:
 	int32_t fetchInteger();
 	void checkNumber(Object * o) const;
 	void checkInteger(Object * o) const;
+	uint32_t allocate(Class * cls);
+	uint32_t allocateString(const char * value);
+	uint32_t allocateNumber(double value);
+	uint32_t allocateNumber(int value);
 
 	StackFrame * currentFrame;
 	ClassLoader * classLoader;
