@@ -2,14 +2,16 @@
 #include "bytecodeconstants.h"
 #include <string.h>
 
-#define MEMORY_SIZE 5
+#define MEMORY_SIZE 1024
 #define FIELDS_SIZE 100000
+#define FILES_SIZE 1000
 
 using namespace std;
 
 Memory::Memory(): memory(new Object[MEMORY_SIZE], new Object[MEMORY_SIZE], MEMORY_SIZE), 
 	fields(new uint32_t[FIELDS_SIZE], new uint32_t[FIELDS_SIZE], FIELDS_SIZE), 
-	doubles(new double[MEMORY_SIZE], new double[MEMORY_SIZE], MEMORY_SIZE)
+	doubles(new double[MEMORY_SIZE], new double[MEMORY_SIZE], MEMORY_SIZE),
+	files(new FILE *[FILES_SIZE], new FILE *[FILES_SIZE], FILES_SIZE)
 {
 }
 
@@ -21,12 +23,6 @@ Memory::~Memory()
 		delete [] (*it);
 	}
 	strings.clear();
-	for(vector<fstream *>::iterator it = files.begin(); it < files.end(); it ++)
-	{
-		(*it)->close();
-		delete [] (*it);
-	}
-	files.clear();
 }
 
 uint32_t Memory::allocate(Class * cls)
@@ -147,26 +143,24 @@ double Memory::getDoubleValue(uint32_t ref) const
 	return doubles.used[ref];
 }
 
-fstream * Memory::getFileStream(uint32_t file)
+FILE * Memory::getFileStream(uint32_t file)
 {
 	if(file >= doubles.size)
 	{
 		throw "No such file descriptor.";
 	}
-	return files[file];
+	return files.used[file];
 }
 
 uint32_t Memory::createFile(const char * fileName)
 {
-	fstream * file = new fstream;
-	file->open(fileName,  ios::in | ios::out | ios::binary);
-	if(file->is_open())
+	FILE * file = fopen(fileName,  "rw");
+	if(file)
 	{
-		files.push_back(file);
-		return files.size() - 1;
+		files.used[files.size] = file;
+		return files.size ++;
 	} else 
 	{
-		delete file;
 		return VM_NULL;
 	}
 }
@@ -177,6 +171,7 @@ void Memory::gc(StackFrame * stack)
 	memory.size = 0;
 	fields.size = 0;
 	doubles.size = 0;
+	files.size = 0;
 	ints.clear();
 	while(sf)
 	{
@@ -198,7 +193,12 @@ void Memory::gc(StackFrame * stack)
 			doubles.empty[doubles.size] = doubles.used[o->getValue(0)];
 			o->setValue(0, doubles.size);
 			doubles.size ++;
-		} else if(o->getType()->getName() == STRING_CLASS)
+		} else if(o->getType()->getName() == FILE_CLASS)
+		{
+			files.empty[doubles.size] = files.used[o->getValue(0)];
+			o->setValue(0, files.size);
+			files.size ++;
+		}  else if(o->getType()->getName() == STRING_CLASS)
 		{
 			
 		} else
@@ -210,9 +210,10 @@ void Memory::gc(StackFrame * stack)
 		}
 		scan ++;
 	}
-	std::swap(memory.used, memory.empty);
-	std::swap(fields.used, fields.empty);
-	std::swap(doubles.used, doubles.empty);
+	memory.swap();
+	fields.swap();
+	doubles.swap();
+	files.swap();
 }
 
 uint32_t Memory::moveObject(uint32_t ptr)

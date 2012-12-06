@@ -3,6 +3,7 @@
 #include "memory.h"
 #include <iostream>
 #include <string>
+#include <string.h>
 
 class Print: public NativeMethod
 {
@@ -125,8 +126,8 @@ public:
 		{
 			throw "Not a file.";
 		}
-		std::fstream * file = heap->getFileStream(self->getValue(0));
-		file->close();
+		FILE * file = heap->getFileStream(self->getValue(0));
+		fclose(file);
 		return VM_NULL;
 	}
 };
@@ -146,10 +147,25 @@ public:
 		{
 			throw "Not a file.";
 		}
-		std::fstream * file = heap->getFileStream(self->getValue(0));
-		std::string buffer;
-		getline(*file, buffer);
-		return heap->allocateString(str, buffer.c_str());
+		FILE * file = heap->getFileStream(self->getValue(0));
+		std::string line;
+		char buffer[256];
+		while(true)
+		{
+			fgets(buffer, sizeof(buffer), file);
+			unsigned int len = strlen(buffer);
+			if(buffer[len - 1] == '\n')
+			{
+				buffer[len - 1] = 0;
+				len --;
+			}
+			line.append(buffer);
+			if(len < sizeof(buffer) - 1)
+			{
+				break;
+			}
+		}
+		return heap->allocateString(str, line.c_str());
 	}
 private:
 	Class * str;
@@ -170,9 +186,9 @@ public:
 		{
 			throw "Not a file.";
 		}
-		std::fstream * file = heap->getFileStream(self->getValue(0));
+		FILE * file = heap->getFileStream(self->getValue(0));
 		int32_t value;
-		(*file) >> value;
+		fscanf(file, "%i", &value);
 		return heap->allocateNumber(integer, value);
 	}
 private:
@@ -194,9 +210,9 @@ public:
 		{
 			throw "Not a file.";
 		}
-		std::fstream * file = heap->getFileStream(self->getValue(0));
+		FILE * file = heap->getFileStream(self->getValue(0));
 		double value;
-		(*file) >> value;
+		fscanf(file, "%lf", &value);
 		return heap->allocateNumber(real, value);
 	}
 private:
@@ -218,18 +234,18 @@ public:
 		{
 			throw "Not a file.";
 		}
-		std::fstream * file = heap->getFileStream(self->getValue(0));
+		FILE * file = heap->getFileStream(self->getValue(0));
 		Object * o = heap->getObject(params[0]);
 		std::string className = o->getType()->getName();
 		if(className == INT_CLASS)
 		{
-			(* file) << o->getValue(0);
+			fprintf(file, "%d", o->getValue(0));
 		} else if(className == REAL_CLASS)
 		{
-			(* file) << heap->getDoubleValue(o->getValue(0));
+			fprintf(file, "%lf", heap->getDoubleValue(o->getValue(0)));
 		} else if(className == STRING_CLASS)
 		{
-			(* file) << heap->getStringValue(o->getValue(0));
+			fprintf(file, "%s", heap->getStringValue(o->getValue(1)));
 		}
 		return VM_NULL;
 	}

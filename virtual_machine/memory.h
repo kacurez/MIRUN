@@ -6,9 +6,9 @@
 
 #include <vector>
 #include <map>
-#include <fstream>
 #include "object.h"
 #include "stackframe.h"
+#include <stdio.h>
 
 template<class T> class Page
 {
@@ -24,6 +24,11 @@ public:
 	bool isSpace(uint32_t requested = 1) const
 	{
 		return requested + size < maxSize;
+	}
+	
+	void swap()
+	{
+		std::swap(used, empty);
 	}
 	
 	T used;
@@ -46,7 +51,7 @@ public:
 	double getDoubleValue(uint32_t ref) const;
 	const char * getStringValue(uint32_t ref) const;
 	uint32_t createFile(const char * fileName);
-	std::fstream * getFileStream(uint32_t file);
+	FILE * getFileStream(uint32_t file);
 	void gc(StackFrame * stack);
 
 private:
@@ -55,7 +60,7 @@ private:
 	std::map<int, uint32_t> ints;
 	Page<double *> doubles;
 	std::vector<char *> strings;
-	std::vector<std::fstream *> files;
+	Page<FILE **> files;
 	
 	uint32_t moveObject(uint32_t ptr);
 	
