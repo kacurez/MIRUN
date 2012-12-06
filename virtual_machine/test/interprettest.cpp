@@ -241,17 +241,23 @@ void InterpretTest::localsTest()
 	assert(50 == instance.run(cls->getName().c_str(), m->getName().c_str()));
 }
 
-void InterpretTest::nativeTest()
+void InterpretTest::consoleTest()
 {
 	ConstantPool * pool = new ConstantPool();
-	Class * cls = initClass("NativeTest", pool);
+	Class * cls = initClass("ConsoleTest", pool);
 	const char code[] = 
 	{
 		PUSH, 0x00, 0x00,
-		CALL, 0x01, 0x00, 0x00,
+		CALL, 0x01, 0x00, 0x00, //console.print(20)
+		CALL, 0x01, 0x00, 0x01, //line = console.readLine()
+		CALL, 0x01, 0x00, 0x00, //console.print(line)
+		CALL, 0x01, 0x00, 0x02, //i = console.readInt()
+		CALL, 0x01, 0x00, 0x00, //console.print(i)
+		CALL, 0x01, 0x00, 0x03, //i = console.readReal()
+		CALL, 0x01, 0x00, 0x00, //console.print(i)
 		RET_VOID
 	};
-	Method * m = initMethod("nativeTest", code, sizeof(code), 0, 2, 0);
+	Method * m = initMethod("consoleTest", code, sizeof(code), 0, 2, 0);
 	ClassLoader cl("");
 	Interpret instance(&cl);
 	IntConst i;
