@@ -3,16 +3,15 @@
 #include <string.h>
 
 #define MEMORY_SIZE 1024
-#define FIELDS_SIZE 100000
+#define FIELDS_SIZE 10000
 #define FILES_SIZE 1000
+
+#define STRING_SPACE(x) (x)/sizeof(uint32_t) + ((x) % sizeof(uint32_t) == 0 ? 0 : 1)
 
 using namespace std;
 
 Memory::Memory(): memory(new Object[MEMORY_SIZE], new Object[MEMORY_SIZE], MEMORY_SIZE), 
-	fields(new uint32_t[FIELDS_SIZE], new uint32_t[FIELDS_SIZE], FIELDS_SIZE), 
-	doubles(new double[MEMORY_SIZE], new double[MEMORY_SIZE], MEMORY_SIZE),
-	strings(new char[FIELDS_SIZE], new char[FIELDS_SIZE], FIELDS_SIZE),
-	files(new FILE *[FILES_SIZE], new FILE *[FILES_SIZE], FILES_SIZE)
+	fields(new uint32_t[FIELDS_SIZE], new uint32_t[FIELDS_SIZE], FIELDS_SIZE)
 {
 }
 
@@ -49,19 +48,20 @@ Object * Memory::getObject(uint32_t pointer) const
 
 uint32_t Memory::allocateNumber(Class * cls, double value)
 {
-	if(!doubles.isSpace())
+	static unsigned int doubleSize = sizeof(double)/sizeof(uint32_t);
+	if(!fields.isSpace(doubleSize))
 	{
 		return VM_NULL;
 	}
 	uint32_t ptr = allocate(cls);
-	if(ptr ==VM_NULL)
+	if(ptr == VM_NULL)
 	{
 		return ptr;
 	}
 	Object * o = getObject(ptr);
-	doubles.used[doubles.size] = value;
-	o->setValue(0, doubles.size);
-	doubles.size ++;
+	memcpy(fields.used + fields.size, &value, sizeof(double));
+	o->setValue(0, fields.size);
+	fields.size += doubleSize;
 	return ptr;
 }
 
@@ -91,8 +91,9 @@ uint32_t Memory::allocateNumber(Class * cls, int32_t value)
 uint32_t Memory::allocateString(Class * cls, const char * value)
 {
 	//TODO intern strings
-	int length = strlen(value);
-	if(!strings.isSpace(length))
+	unsigned int length = strlen(value);
+	unsigned int memSize = STRING_SPACE(length);
+	if(!fields.isSpace(memSize))
 	{
 		return VM_NULL;
 	}
@@ -102,10 +103,10 @@ uint32_t Memory::allocateString(Class * cls, const char * value)
 		return VM_NULL;
 	}
 	Object * str = getObject(ptr);
-	strcpy(strings.used + strings.size, value);
+	memcpy(fields.used + fields.size, value, length);
 	str->setValue(0, length);
-	str->setValue(1, strings.size);
-	strings.size += length;
+	str->setValue(1, fields.size);
+	fields.size += memSize;
 	return ptr;
 }
 
@@ -127,29 +128,29 @@ uint32_t Memory::allocateArray(Class * cls, uint32_t length)
 
 const char * Memory::getStringValue(uint32_t ref) const
 {
-	if(ref >= strings.size)
+	if(ref >= fields.size)
 	{
 		throw "Memory violation.";
 	}
-	return strings.used + ref;
+	return (char *)(fields.used + ref);
 }
 
 double Memory::getDoubleValue(uint32_t ref) const
 {
-	if(ref >= doubles.size)
+	if(ref >= fields.size)
 	{
 		throw "Memory violation.";
 	}
-	return doubles.used[ref];
+	return *(double *)(fields.used + ref);
 }
 
 FILE * Memory::getFileStream(uint32_t file)
 {
-	if(file >= doubles.size)
+	if(file >= fields.size)
 	{
 		throw "No such file descriptor.";
 	}
-	return files.used[file];
+	return (FILE *)(fields.used + file);
 }
 
 uint32_t Memory::createFile(const char * fileName)
@@ -157,8 +158,10 @@ uint32_t Memory::createFile(const char * fileName)
 	FILE * file = fopen(fileName,  "rw");
 	if(file)
 	{
-		files.used[files.size] = file;
-		return files.size ++;
+		memcpy(fields.used + fields.size, &file, sizeof(FILE *));
+		uint32_t ret = fields.size;
+		fields.size += sizeof(FILE *);
+		return ret;
 	} else 
 	{
 		return VM_NULL;
@@ -170,9 +173,6 @@ void Memory::gc(StackFrame * stack)
 	StackFrame * sf = stack;
 	memory.size = 0;
 	fields.size = 0;
-	doubles.size = 0;
-	strings.size = 0;
-	files.size = 0;
 	ints.clear();
 	while(sf)
 	{
@@ -191,19 +191,20 @@ void Memory::gc(StackFrame * stack)
 			ints[(int)o->getValue(0)] = scan;
 		} else if(o->getType()->getName() == REAL_CLASS)
 		{
-			doubles.empty[doubles.size] = doubles.used[o->getValue(0)];
-			o->setValue(0, doubles.size);
-			doubles.size ++;
+			static unsigned int doubleSize = sizeof(double)/sizeof(uint32_t);
+			memcpy(fields.empty + fields.size, fields.used + o->getValue(0), sizeof(double));
+			o->setValue(0, fields.size);
+			fields.size += doubleSize;
 		} else if(o->getType()->getName() == FILE_CLASS)
 		{
-			files.empty[doubles.size] = files.used[o->getValue(0)];
-			o->setValue(0, files.size);
-			files.size ++;
+			memcpy(fields.empty + fields.size, fields.used + o->getValue(0), sizeof(FILE *));
+			o->setValue(0, fields.size);
+			fields.size += sizeof(FILE *);
 		}  else if(o->getType()->getName() == STRING_CLASS)
 		{
-			memcpy(strings.empty + strings.size, strings.used + o->getValue(1), o->getValue(0));
-			o->setValue(1, strings.size);
-			strings.size += o->getValue(0);
+			memcpy(fields.empty + fields.size, fields.used + o->getValue(1), o->getValue(0));
+			o->setValue(1, fields.size);
+			fields.size += STRING_SPACE(o->getValue(0));
 		} else
 		{
 			for(unsigned int i = 0; i < o->getFieldCount(); i ++)
@@ -215,9 +216,6 @@ void Memory::gc(StackFrame * stack)
 	}
 	memory.swap();
 	fields.swap();
-	doubles.swap();
-	strings.swap();
-	files.swap();
 }
 
 uint32_t Memory::moveObject(uint32_t ptr)

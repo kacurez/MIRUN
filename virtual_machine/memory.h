@@ -57,9 +57,6 @@ private:
 	Page<Object *> memory;
 	Page<uint32_t *> fields;
 	std::map<int, uint32_t> ints;
-	Page<double *> doubles;
-	Page<char *> strings;
-	Page<FILE **> files;
 	
 	uint32_t moveObject(uint32_t ptr);
 	

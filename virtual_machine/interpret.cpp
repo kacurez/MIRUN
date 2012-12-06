@@ -65,7 +65,11 @@ int Interpret::run()
 				break;
 			}	
 			case NEW_ARRAY:
+			{
+				uint32_t length = fetchInteger();
+				currentFrame->push(allocateArray(length));
 				break;
+			}
 			case JMP:
 				doJump();
 				break;
@@ -428,3 +432,17 @@ uint32_t Interpret::allocateNumber(double value)
 	return ptr;
 }
 
+uint32_t Interpret::allocateArray(uint32_t length)
+{
+	uint32_t ptr = heap->allocateArray(classLoader->getClass(ARRAY_CLASS), length);
+	if(ptr == VM_NULL)
+	{
+		heap->gc(currentFrame);
+		ptr = heap->allocateArray(classLoader->getClass(ARRAY_CLASS), length);
+		if(ptr == VM_NULL)
+		{
+			throw "Out of memory.";
+		}
+	}
+	return ptr;
+}

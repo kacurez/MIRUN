@@ -29,6 +29,7 @@ private:
 	uint32_t allocateString(const char * value);
 	uint32_t allocateNumber(double value);
 	uint32_t allocateNumber(int value);
+	uint32_t allocateArray(uint32_t length);
 
 	StackFrame * currentFrame;
 	ClassLoader * classLoader;
