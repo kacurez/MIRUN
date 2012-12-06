@@ -4,7 +4,6 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <vector>
 #include <map>
 #include "object.h"
 #include "stackframe.h"
@@ -59,7 +58,7 @@ private:
 	Page<uint32_t *> fields;
 	std::map<int, uint32_t> ints;
 	Page<double *> doubles;
-	std::vector<char *> strings;
+	Page<char *> strings;
 	Page<FILE **> files;
 	
 	uint32_t moveObject(uint32_t ptr);

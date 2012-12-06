@@ -11,6 +11,7 @@ using namespace std;
 Memory::Memory(): memory(new Object[MEMORY_SIZE], new Object[MEMORY_SIZE], MEMORY_SIZE), 
 	fields(new uint32_t[FIELDS_SIZE], new uint32_t[FIELDS_SIZE], FIELDS_SIZE), 
 	doubles(new double[MEMORY_SIZE], new double[MEMORY_SIZE], MEMORY_SIZE),
+	strings(new char[FIELDS_SIZE], new char[FIELDS_SIZE], FIELDS_SIZE),
 	files(new FILE *[FILES_SIZE], new FILE *[FILES_SIZE], FILES_SIZE)
 {
 }
@@ -18,11 +19,6 @@ Memory::Memory(): memory(new Object[MEMORY_SIZE], new Object[MEMORY_SIZE], MEMOR
 Memory::~Memory()
 {
 	ints.clear();
-	for(vector<char *>::iterator it = strings.begin(); it < strings.end(); it ++)
-	{
-		delete [] (*it);
-	}
-	strings.clear();
 }
 
 uint32_t Memory::allocate(Class * cls)
@@ -95,17 +91,21 @@ uint32_t Memory::allocateNumber(Class * cls, int32_t value)
 uint32_t Memory::allocateString(Class * cls, const char * value)
 {
 	//TODO intern strings
+	int length = strlen(value);
+	if(!strings.isSpace(length))
+	{
+		return VM_NULL;
+	}
 	uint32_t ptr = allocate(cls);
 	if(ptr ==VM_NULL)
 	{
-		return ptr;
+		return VM_NULL;
 	}
 	Object * str = getObject(ptr);
-	int length = strlen(value);
-	char * copy = new char[length];
-	strcpy(copy, value);
-	strings.push_back(copy);
-	str->setValue(0, strings.size() - 1);
+	strcpy(strings.used + strings.size, value);
+	str->setValue(0, length);
+	str->setValue(1, strings.size);
+	strings.size += length;
 	return ptr;
 }
 
@@ -127,11 +127,11 @@ uint32_t Memory::allocateArray(Class * cls, uint32_t length)
 
 const char * Memory::getStringValue(uint32_t ref) const
 {
-	if(ref >= strings.size())
+	if(ref >= strings.size)
 	{
 		throw "Memory violation.";
 	}
-	return strings[ref];
+	return strings.used + ref;
 }
 
 double Memory::getDoubleValue(uint32_t ref) const
@@ -171,6 +171,7 @@ void Memory::gc(StackFrame * stack)
 	memory.size = 0;
 	fields.size = 0;
 	doubles.size = 0;
+	strings.size = 0;
 	files.size = 0;
 	ints.clear();
 	while(sf)
@@ -200,7 +201,9 @@ void Memory::gc(StackFrame * stack)
 			files.size ++;
 		}  else if(o->getType()->getName() == STRING_CLASS)
 		{
-			
+			memcpy(strings.empty + strings.size, strings.used + o->getValue(1), o->getValue(0));
+			o->setValue(1, strings.size);
+			strings.size += o->getValue(0);
 		} else
 		{
 			for(unsigned int i = 0; i < o->getFieldCount(); i ++)
@@ -213,6 +216,7 @@ void Memory::gc(StackFrame * stack)
 	memory.swap();
 	fields.swap();
 	doubles.swap();
+	strings.swap();
 	files.swap();
 }
 

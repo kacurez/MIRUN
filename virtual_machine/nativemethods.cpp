@@ -25,7 +25,7 @@ public:
 			std::cout << heap->getDoubleValue(o->getValue(0)) << std::endl;
 		} else if(className == STRING_CLASS)
 		{
-			std::cout << heap->getStringValue(o->getValue(0)) << std::endl;
+			std::cout << heap->getStringValue(o->getValue(1)) << std::endl;
 		}
 		return VM_NULL;
 	}
