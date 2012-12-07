@@ -23,6 +23,8 @@ public:
 	uint32_t size() const;
 	uint32_t getValueAt(uint32_t index) const;
 	void setValueAt(uint32_t index, uint32_t value);
+	uint32_t getLocal(uint32_t local) const;
+	uint32_t getLocalCount() const;
 	
 	const char * code;
 	ConstantPool * constants;

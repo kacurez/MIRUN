@@ -4,37 +4,11 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include <queue>
 #include <map>
 #include "object.h"
 #include "stackframe.h"
 #include <stdio.h>
-
-template<class T> class Page
-{
-public:
-	Page(T used, T empty, uint32_t maxSize): used(used), empty(empty), size(0), maxSize(maxSize) {}
-	
-	~Page()
-	{
-		delete [] used;
-		delete [] empty;
-	}
-	
-	bool isSpace(uint32_t requested = 1) const
-	{
-		return requested + size < maxSize;
-	}
-	
-	void swap()
-	{
-		std::swap(used, empty);
-	}
-	
-	T used;
-	T empty;
-	uint32_t size;
-	uint32_t maxSize;
-};
 
 class Memory
 {
@@ -54,11 +28,17 @@ public:
 	void gc(StackFrame * stack);
 
 private:
-	Page<Object *> memory;
-	Page<uint32_t *> fields;
+	char * used;
+	char * empty;
+	uint32_t size;
+	uint32_t maxSize;
+	uint32_t objectSize;
 	std::map<int, uint32_t> ints;
+	std::queue<uint32_t> moved;
 	
 	uint32_t moveObject(uint32_t ptr);
+	void moveField(Object * o, uint32_t field, uint32_t fieldSize);
+	bool isSpace(uint32_t requested = 1) const;
 	
 };
 

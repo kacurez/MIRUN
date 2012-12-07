@@ -99,3 +99,17 @@ void StackFrame::setValueAt(uint32_t index, uint32_t value)
 {
 	stack[index] = value;
 }
+
+uint32_t StackFrame::getLocalCount() const
+{
+	return localCount;
+}
+
+uint32_t StackFrame::getLocal(uint32_t local) const
+{
+	if(local >= localCount)
+	{
+		throw "No such local.";
+	}
+	return locals[local];
+}

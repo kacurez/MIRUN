@@ -14,6 +14,8 @@ public:
 	void callDynamicTest();
 	void localsTest();
 	void consoleTest();
+	void arrayTest();
+	void gcTest();
 	
 private:
 	Method * initMethod(const char * name, const char * code, int codeLength, int paramCount, int locals, int flag);

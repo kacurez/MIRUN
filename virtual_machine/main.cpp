@@ -16,6 +16,8 @@ int main()
 		test.callDynamicTest();
 		test.localsTest();
 		test.consoleTest();
+		test.arrayTest();
+		test.gcTest();
 	} catch(const char * ex)
 	{
 		cout << "Program terminated: " << ex << endl;

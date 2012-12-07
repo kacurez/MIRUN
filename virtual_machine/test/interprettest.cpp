@@ -270,6 +270,97 @@ void InterpretTest::consoleTest()
 	cl.addClass(cls);
 	instance.run(cls->getName().c_str(), m->getName().c_str());
 }
+
+void InterpretTest::gcTest()
+{
+	ConstantPool * pool = new ConstantPool();
+	Class * cls = initClass("GCTest", pool);
+	const char code[] = 
+	{
+		PUSH, 0x00, 0x00,
+		STORE_LOCAL, 0x00,
+		PUSH, 0x01, 0x00, //label1
+		LOAD_LOCAL, 0x00,
+		SUB,
+		IF_GE, 0x0C,//if(i < 1000)
+		PUSH, 0x01, 0x00,
+		NEW_ARRAY,
+		POP,
+		LOAD_LOCAL, 0x00,
+		INC,
+		STORE_LOCAL, 0x00,
+		JMP, -20,
+		RET_VOID
+	};
+	Method * m = initMethod("gcTest", code, sizeof(code), 0, 1, 0);
+	ClassLoader cl("");
+	Interpret instance(&cl);
+	IntConst i;
+	i.value = 0;
+	pool->addItem(&i, INT_CONST);//0
+	i.value = 1000;
+	pool->addItem(&i, INT_CONST);//1
+	cls->addMethod(m);
+	cl.addClass(cls);
+	instance.run(cls->getName().c_str(), m->getName().c_str());
+}
+
+void InterpretTest::arrayTest()
+{
+	ConstantPool * pool = new ConstantPool();
+	Class * cls = initClass("ArrayTest", pool);
+	const char code[] = 
+	{
+		PUSH, 0x01, 0x00,
+		NEW_ARRAY, // a = array[10]
+		STORE_LOCAL, 0x00,
+		PUSH, 0x00, 0x00,
+		STORE_LOCAL, 0x01, // i = 0
+		PUSH, 0x01, 0x00, //label1
+		LOAD_LOCAL, 0x01,
+		SUB,
+		IF_GE, 0x0C,//if(i < 10)
+		LOAD_LOCAL, 0x01,
+		DUP, DUP,
+		LOAD_LOCAL, 0x00,
+		STORE_ARRAY, //a[i] = i
+		INC,
+		STORE_LOCAL, 0x01,
+		JMP, -20, //jmp label1
+		PUSH, 0x00, 0x00,
+		PUSH, 0x00, 0x00,
+		STORE_LOCAL, 0x01,
+		STORE_LOCAL, 0x02,
+		PUSH, 0x01, 0x00, //label2
+		LOAD_LOCAL, 0x01,
+		SUB,
+		IF_GE, 17,//if(i < 10)
+		LOAD_LOCAL, 0x01,
+		LOAD_LOCAL, 0x00,
+		LOAD_ARRAY, 
+		LOAD_LOCAL, 0x02,
+		ADD,  
+		STORE_LOCAL, 0x02, //sum += a[i]
+		LOAD_LOCAL, 0x01,
+		INC,
+		STORE_LOCAL, 0x01,
+		JMP, -25, //jmp label2
+		LOAD_LOCAL, 0x02,
+		RET
+	};
+	Method * m = initMethod("arrayTest", code, sizeof(code), 0, 3, 0);
+	ClassLoader cl("");
+	Interpret instance(&cl);
+	IntConst i;
+	i.value = 0;
+	pool->addItem(&i, INT_CONST);//0
+	i.value = 10;
+	pool->addItem(&i, INT_CONST);//0
+	cls->addMethod(m);
+	cl.addClass(cls);
+	assert(45 == instance.run(cls->getName().c_str(), m->getName().c_str()));
+}
+
 Method * InterpretTest::initMethod(const char * name, const char * code, int codeLength, int paramCount, int locals, int flag)
 {
 	Method * m = new Method(name);
