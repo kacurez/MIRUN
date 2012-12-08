@@ -32,7 +32,6 @@ Class * ClassLoader::getClass(const char * className)
 
 Class * ClassLoader::loadClass(const char * className)
 {
-	uint16_t id;
 	uint8_t fieldCount, methodCount;
 	char name[IDENTIFIER_LENGTH];
 	Class * cl;
@@ -41,7 +40,6 @@ Class * ClassLoader::loadClass(const char * className)
 	{
 		throw "Class not found!";
 	}
-	file.read((char *)&id, sizeof(uint16_t));
 	file.read(name, IDENTIFIER_LENGTH);
 	cl = new Class(name);
 	cl->setConstPool(loadConstantPool());
@@ -59,7 +57,7 @@ Class * ClassLoader::loadClass(const char * className)
 		cl->addMethod(loadMethod());
 	}
 	file.close();
-	cout << "id = " << id << "\nname = " << cl->getName() << endl;
+	cout << "\nname = " << cl->getName() << endl;
 	return cl;
 }
 
@@ -136,6 +134,13 @@ ConstantPool * ClassLoader::loadConstantPool()
 				item = new RealConst;
 				file.read((char *)item, sizeof(RealConst));
 				cout << "Real[" << ((RealConst *)item)->value << "]" << endl;
+				break;
+			}
+			case FIELD_REF:
+			{
+				item = new FieldRef;
+				file.read((char *)item, sizeof(FieldRef));
+				cout << "ClassRef[\""  << ((FieldRef *)item)->name << "\"]" << endl;
 				break;
 			}
 			default:

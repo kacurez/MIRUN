@@ -17,7 +17,7 @@ ConstantPool::~ConstantPool()
 	pool.clear();
 }
 
-int ConstantPool::addItem(ConstPoolStruct * item, ConstPoolTag type)
+uint16_t ConstantPool::addItem(ConstPoolStruct * item, ConstPoolTag type)
 {
 	ConstPoolItem * i = new ConstPoolItem(type, item);
 	pool.push_back(i);
@@ -27,6 +27,11 @@ int ConstantPool::addItem(ConstPoolStruct * item, ConstPoolTag type)
 ConstPoolItem* ConstantPool::getItem(unsigned int i) const
 {
 	return pool[i];
+}
+
+uint16_t ConstantPool::size() const
+{
+	return pool.size();
 }
 
 ConstPoolItem::ConstPoolItem(ConstPoolTag type, ConstPoolStruct * data): type(type), string(0)

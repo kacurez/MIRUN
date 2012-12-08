@@ -24,6 +24,7 @@ public:
 	std::string debugString() const;
 	uint8_t getFlag() const;
 	bool isNative() const;
+	uint16_t getCodeSize() const;
 	
 protected:
 	std::string name;

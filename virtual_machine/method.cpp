@@ -96,3 +96,8 @@ bool Method::isNative() const
 {
 	return (flag & 0x02);
 }
+
+uint16_t Method::getCodeSize() const
+{
+	return codeSize;
+}

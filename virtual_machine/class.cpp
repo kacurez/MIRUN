@@ -95,3 +95,19 @@ bool Class::hasMethod(const char * name) const
 	return false;
 }
 
+std::string Class::getFieldName(uint8_t field) const
+{
+	for(std::map<std::string, uint8_t>::const_iterator it = fields.begin(); it != fields.end(); it ++)
+	{
+		if(it->second == field)
+		{
+			return it->first;
+		}
+	}
+	throw "No such field.";
+}
+
+uint8_t Class::getMethodCount() const
+{
+	return methods.size();
+}

@@ -63,8 +63,9 @@ class ConstantPool
 public:
 	ConstantPool();
 	~ConstantPool();
-	int addItem(ConstPoolStruct * item, ConstPoolTag type);
+	uint16_t addItem(ConstPoolStruct * item, ConstPoolTag type);
 	ConstPoolItem * getItem(unsigned int i) const;
+	uint16_t size() const;
 
 private:
 	std::vector<ConstPoolItem *> pool;
