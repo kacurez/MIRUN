@@ -21,17 +21,20 @@ LETTER      [a-zA-Z_]
 
 %%
 
-"int"   {  return INT_; }
-"read"  { return READ_; }
-"print" { return PRINT_; }
+
 "if"    { return IF; }
 "else"  { return ELSE; }
 "return" { return RETURN; }
 "for"   { return FOR; }
 "struct" {return STRUCT; }
-"string" {return STRING_; }
+"class" {return CLASS_; }
+"def" {return DEF_;}
+
 {WHITESPACE}+ 
 "\n" {yylineno++;}
+
+
+
 "}"  { return CURLY_CLOSE_; }
 "{"  { return CURLY_OPEN_; }
 "]"  { return SQUARE_CLOSE_; }
@@ -58,7 +61,7 @@ LETTER      [a-zA-Z_]
 ","  { return COMMA; }
 
 L?\"(\\.|[^\\"])*\"	{ return STRING_LITERAL_; }
-{REAL}  {yylval.integer = truncCreal(); printf("Warning: Conversion from real to int in line %i\n", yylineno);  return CTI_;}
+{REAL}  {yylval.real = truncCreal(); return REAL_;}
 {DIGIT}+ { yylval.integer =createCnumber(); return CTI_; }
 {LETTER}({LETTER}|{DIGIT})* {  yylval.id = createId(); return ID_; }
 "//"[^\n]* 
@@ -71,6 +74,17 @@ L?\"(\\.|[^\\"])*\"	{ return STRING_LITERAL_; }
 }
 
 %%
+
+
+//escapes the first and the last quote and returns the string
+char* createStringLiteral()
+{
+int newLen = yyleng - 2;
+char *buffer = (char*)malloc(newLen + 1); 
+strncpy(buffer, yytext + 1, newlen);
+buffer[newLen] = '\0';
+return buffer;
+}
 
 
 /*returns new allocated char* copied from yytext */
@@ -87,9 +101,9 @@ char *createId()
 	return buffer;
 }
 
-int truncCreal()
+double truncCreal()
 {
-  return (int)atof(yytext);
+  return atof(yytext);
 }
 
 int createCnumber()

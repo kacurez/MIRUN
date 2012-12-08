@@ -9,6 +9,7 @@ int level = 0;
 
 %}
 %union {
+    char *string_literal;
     char *id;
     int integer;
     struct {
@@ -68,8 +69,10 @@ int level = 0;
 }
 
 %error-verbose
-
-%token ID_ CTI_
+%token <real> REAL_
+%token <id>ID_
+%token <integer>CTI_
+%token <string_literal> STRING_LITERAL_
 %token INT_ 
 %token PRINT_ READ_
 %token ASIG_ MAS_ POR_
@@ -89,25 +92,27 @@ int level = 0;
 %token COMMA
 %token STRING_ STRING_LITERAL_
 %%
-program : declarationList;
+program : CLASS_ CURLY_OPEN_ declarationList CURLY_CLOSE_;
 declarationList : declaration | declarationList declaration;
-declaration : variableDeclaration | functionDeclaration | structDeclaration;
-variableDeclaration : type ID_ SEMICOLON_ | type  ID_ SQUARE_OPEN_ CTI_ SQUARE_CLOSE_  SEMICOLON_; 
-type : INT_ | STRING_ | STRUCT ID_;
-structDeclaration : STRUCT ID_ CURLY_OPEN_ structBody CURLY_CLOSE_;
-structBody : structBody memberDeclaration | memberDeclaration;
-memberDeclaration : variableDeclaration | functionDeclaration;
+declaration : variableDeclaration | functionDeclaration;
+variableDeclaration : VAR_ ID_ SEMICOLON_ | VAR_  ID_ SQUARE_OPEN_ CTI_ SQUARE_CLOSE_  SEMICOLON_ ; 
+
+/* type : INT_ | STRING_ | STRUCT ID_; */
+/* structDeclaration : STRUCT ID_ CURLY_OPEN_ structBody CURLY_CLOSE_; */
+/*structBody : structBody memberDeclaration | memberDeclaration;*/
+/*memberDeclaration : variableDeclaration | functionDeclaration;*/
+
 functionDeclaration : functionHead block;
-functionHead : type ID_ PAR_OPEN_ formalParameters PAR_CLOSE_;
+functionHead : DEF_ ID_ PAR_OPEN_ formalParameters PAR_CLOSE_;
 formalParameters : /* eps */ | formalParameterList ;
-formalParameterList : type ID_ | type ID_ COMMA formalParameterList ;
+formalParameterList : ID_ | ID_ COMMA formalParameterList ;
 block : CURLY_OPEN_ localVariableDeclaration instructionList CURLY_CLOSE_ ; 
 localVariableDeclaration : /* eps */ | localVariableDeclaration variableDeclaration;
 instructionList : /* eps */  | instructionList instruction ;
 instruction : CURLY_OPEN_ localVariableDeclaration instructionList CURLY_CLOSE_ |
                 expressionInstruction | ioInstruction | selectionInstruction | iterationInstruction | returnInstruction;
 expressionInstruction : SEMICOLON_ | expression SEMICOLON_;
-ioInstruction : READ_ PAR_OPEN_ ID_ PAR_CLOSE_ SEMICOLON_ | PRINT_ PAR_OPEN_ expression PAR_CLOSE_ SEMICOLON_;
+
 selectionInstruction : IF PAR_OPEN_ expression PAR_CLOSE_  instruction ELSE instruction ;
 iterationInstruction : FOR PAR_OPEN_ optionalExpression SEMICOLON_ expression SEMICOLON_ optionalExpression PAR_CLOSE_  instruction;
 optionalExpression : /* eps */ | expression;
