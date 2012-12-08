@@ -106,7 +106,7 @@ void InterpretTest::jumpTest()
 void InterpretTest::callTest()
 {
 	ConstantPool * pool = new ConstantPool();
-	Class * cls = initClass("CallTest", pool, 1);
+	Class * cls = initClass("CallTest", pool);
 	const char code1[] = 
 	{
 		RET_VOID
@@ -118,8 +118,8 @@ void InterpretTest::callTest()
 	};
 	const char code[] =
 	{
-		CALL, 0x01, 0x00, 0x01, //ClassRef na pozici 1, ukazatel na funkci 1
-		CALL, 0x01, 0x00, 0x02, //ClassRef na pozici 1, ukazatel na funkci 2
+		CALL, 0x01, 0x00, 0x02, 0x00, //ClassRef na pozici 1, MethodRef na pozici 2
+		CALL, 0x01, 0x00, 0x03, 0x00, //ClassRef na pozici 1, MethodRef na pozici 3
 		RET
 	};
 	Method * m = initMethod("callTest", code, sizeof(code), 0, 0, 0);
@@ -129,11 +129,17 @@ void InterpretTest::callTest()
 	Interpret instance(&cl);
 	IntConst i;
 	i.value = 1;
-	pool->addItem(&i, INT_CONST);
+	pool->addItem(&i, INT_CONST);//0
 	ClassRef cr;
 	memset(cr.name, 0x00, IDENTIFIER_LENGTH);
 	sprintf(cr.name, "%s", cls->getName().c_str());
-	pool->addItem(&cr, CLASS_REF);
+	pool->addItem(&cr, CLASS_REF);//1
+	MethodRef mr;
+	sprintf(mr.name, "%s", m1->getName().c_str());
+	mr.params = 0;
+	pool->addItem(&mr, METHOD_REF);//2
+	sprintf(mr.name, "%s", m2->getName().c_str());
+	pool->addItem(&mr, METHOD_REF);//3
 	cls->addMethod(m);
 	cls->addMethod(m1);
 	cls->addMethod(m2);
@@ -144,28 +150,29 @@ void InterpretTest::callTest()
 void InterpretTest::callDynamicTest()
 {
 	ConstantPool * pool = new ConstantPool();
-	Class * cls = initClass("Counter", pool, 1);
+	Class * cls = initClass("Counter", pool);
+	cls->addField("counter");
 	const char code1[] = 
 	{
 		LOAD_LOCAL, 0x00, // PUSH this
-		LOAD, 0x00, //PUSH this[0]
+		LOAD, 0x06, 0x00, //PUSH this[0]
 		LOAD_LOCAL, 0x01, // PUSH value
 		ADD,  // this[0] + value
 		LOAD_LOCAL, 0x00, // PUSH this
-		STORE, 0x00, // this[0] = this[0] + value
+		STORE, 0x06, 0x00, // this[0] = this[0] + value
 		RET_VOID
 	};
 	const char code2[] = 
 	{
 		LOAD_LOCAL, 0x00, // PUSH this
-		LOAD, 0x00, //PUSH this[0]
+		LOAD, 0x06, 0x00, //PUSH this[0]
 		RET
 	};
 	const char code3[] = 
 	{
 		PUSH, 0x04, 0x00, // PUSH 0
 		LOAD_LOCAL, 0x00, // PUSH this
-		STORE, 0x00,  // this[0] = 0
+		STORE, 0x06, 0x00,  // this[0] = 0
 		RET_VOID
 	};
 	const char code[] =
@@ -205,6 +212,10 @@ void InterpretTest::callDynamicTest()
 	pool->addItem(&i, INT_CONST); //4
 	i.value = 3;
 	pool->addItem(&i, INT_CONST); //5
+	FieldRef fr;
+	memset(fr.name, 0x00, IDENTIFIER_LENGTH);
+	sprintf(fr.name, "counter");
+	pool->addItem(&fr, FIELD_REF); //6
 	cls->addMethod(m);
 	cls->addMethod(m1);
 	cls->addMethod(m2);
@@ -248,13 +259,13 @@ void InterpretTest::consoleTest()
 	const char code[] = 
 	{
 		PUSH, 0x00, 0x00,
-		CALL, 0x01, 0x00, 0x00, //console.print(20)
-		CALL, 0x01, 0x00, 0x01, //line = console.readLine()
-		CALL, 0x01, 0x00, 0x00, //console.print(line)
-		CALL, 0x01, 0x00, 0x02, //i = console.readInt()
-		CALL, 0x01, 0x00, 0x00, //console.print(i)
-		CALL, 0x01, 0x00, 0x03, //i = console.readReal()
-		CALL, 0x01, 0x00, 0x00, //console.print(i)
+		CALL, 0x01, 0x00, 0x02, 0x00, //console.print(20)
+		CALL, 0x01, 0x00, 0x03, 0x00, //line = console.readLine()
+		CALL, 0x01, 0x00, 0x02, 0x00, //console.print(line)
+		CALL, 0x01, 0x00, 0x04, 0x00, //i = console.readInt()
+		CALL, 0x01, 0x00, 0x02, 0x00, //console.print(i)
+		CALL, 0x01, 0x00, 0x05, 0x00, //i = console.readReal()
+		CALL, 0x01, 0x00, 0x02, 0x00, //console.print(i)
 		RET_VOID
 	};
 	Method * m = initMethod("consoleTest", code, sizeof(code), 0, 2, 0);
@@ -266,6 +277,19 @@ void InterpretTest::consoleTest()
 	ClassRef cr;
 	sprintf(cr.name, "%s", CONSOLE_CLASS);//1
 	pool->addItem(&cr, CLASS_REF);
+	MethodRef mr;
+	sprintf(mr.name, "print");
+	mr.params = 1;
+	pool->addItem(&mr, METHOD_REF);//2
+	sprintf(mr.name, "readLine");
+	mr.params = 0;
+	pool->addItem(&mr, METHOD_REF);//3
+	sprintf(mr.name, "readInt");
+	mr.params = 0;
+	pool->addItem(&mr, METHOD_REF);//4
+	sprintf(mr.name, "readReal");
+	mr.params = 0;
+	pool->addItem(&mr, METHOD_REF);//5
 	cls->addMethod(m);
 	cl.addClass(cls);
 	instance.run(cls->getName().c_str(), m->getName().c_str());
@@ -282,17 +306,17 @@ void InterpretTest::gcTest()
 		PUSH, 0x01, 0x00, //label1
 		LOAD_LOCAL, 0x00,
 		SUB,
-		IF_GE, 0x0C,//if(i < 1000)
+		IF_GE, 0x0D,//if(i < 1000)
 		PUSH, 0x01, 0x00,
 		NEW_ARRAY,
-		POP,
+		STORE_LOCAL, 0x01,
 		LOAD_LOCAL, 0x00,
 		INC,
 		STORE_LOCAL, 0x00,
-		JMP, -20,
+		JMP, -21,
 		RET_VOID
 	};
-	Method * m = initMethod("gcTest", code, sizeof(code), 0, 1, 0);
+	Method * m = initMethod("gcTest", code, sizeof(code), 0, 2, 0);
 	ClassLoader cl("");
 	Interpret instance(&cl);
 	IntConst i;
@@ -371,11 +395,10 @@ Method * InterpretTest::initMethod(const char * name, const char * code, int cod
 	return m;
 }
 
-Class* InterpretTest::initClass(const char * name, ConstantPool * pool, int fields)
+Class* InterpretTest::initClass(const char * name, ConstantPool * pool)
 {
 	Class * c = new Class(name);
 	c->setConstPool(pool);
-	c->setFieldCount(fields);
 	return c;
 }
 

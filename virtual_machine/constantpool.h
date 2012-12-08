@@ -37,6 +37,8 @@ struct RealConst: public ConstPoolStruct
 	double value;
 };
 
+typedef ClassRef FieldRef;
+
 class ConstPoolItem 
 {
 public:
@@ -61,7 +63,7 @@ class ConstantPool
 public:
 	ConstantPool();
 	~ConstantPool();
-	void addItem(ConstPoolStruct * item, ConstPoolTag type);
+	int addItem(ConstPoolStruct * item, ConstPoolTag type);
 	ConstPoolItem * getItem(unsigned int i) const;
 
 private:

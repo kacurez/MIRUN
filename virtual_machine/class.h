@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <inttypes.h>
 #include "method.h"
 #include "constantpool.h"
@@ -16,16 +17,19 @@ public:
 	void addMethod(Method * f);
 	Method * getMethod(uint8_t i) const;
 	Method * getMethod(const char * name) const;
+	Method * getMethod(const char * name, uint8_t paramCount) const;
+	bool hasMethod(const char * name) const;
 	int getFieldCount() const;
-	void setFieldCount(uint8_t fieldCount);
 	void setConstPool(ConstantPool * pool);
 	ConstantPool * getConstantPool() const;
+	void addField(const char * name);
+	uint8_t getFieldIndex(const char * name);
 	
 private:
 	std::string name;
 	std::vector<Method *> methods;
-	uint8_t fieldCount;
 	ConstantPool * pool;
+	std::map<std::string, uint8_t> fields;  
 };
 
 #endif // CLASS_H

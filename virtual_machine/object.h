@@ -14,6 +14,8 @@ public:
 	Class * getType() const;
 	uint32_t getValue(uint32_t field) const;
 	void setValue(uint32_t field, uint32_t value);
+	uint32_t getValueByName(const char * field) const;
+	void setValueByName(const char * field, uint32_t value);
 	uint32_t * getFields() const;
 	void setFields(uint32_t * fields);
 	uint32_t getFieldCount() const;

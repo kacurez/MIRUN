@@ -73,3 +73,14 @@ uint32_t Object::getFieldCount() const
 {
 	return fieldCount;
 }
+
+void Object::setValueByName(const char * field, uint32_t value)
+{
+	fields[type->getFieldIndex(field)] = value;
+}
+
+uint32_t Object::getValueByName(const char * field) const
+{
+	return fields[type->getFieldIndex(field)];
+}
+

@@ -61,7 +61,14 @@ int Interpret::run()
 				uint16_t classNamePtr = currentFrame->nextShort();
 				ConstPoolItem * i = currentFrame->constants->getItem(classNamePtr);
 				assert(i->getType() == CLASS_REF);
-				currentFrame->push(allocate(classLoader->getClass(i->getStringValue())));
+				Class * cls = classLoader->getClass(i->getStringValue());
+				uint32_t ref = allocate(cls);
+				currentFrame->push(ref);
+				if(cls->hasMethod(cls->getName().c_str()))
+				{
+					callMethod(cls, cls->getMethod(cls->getName().c_str()));
+					currentFrame->push(ref);
+				}
 				break;
 			}	
 			case NEW_ARRAY:
@@ -76,11 +83,13 @@ int Interpret::run()
 			case CALL:
 			{
 				uint16_t classNamePtr = currentFrame->nextShort();
-				uint8_t methodPtr = currentFrame->nextByte();
+				uint16_t methodPtr = currentFrame->nextShort();
 				ConstPoolItem * i = currentFrame->constants->getItem(classNamePtr);
+				ConstPoolItem * methodName = currentFrame->constants->getItem(methodPtr);
 				assert(i->getType() == CLASS_REF);
+				assert(methodName->getType() == METHOD_REF);
 				Class * c = classLoader->getClass(i->getStringValue());
-				Method * m = c->getMethod(methodPtr);
+				Method * m = c->getMethod(methodName->getStringValue(), methodName->getParam());
 				callMethod(c, m);
 				break;
 			}
@@ -91,7 +100,7 @@ int Interpret::run()
 				ConstPoolItem * i = currentFrame->constants->getItem(methodNamePtr);
 				assert(i->getType() == METHOD_REF);
 				const char * methodName = i->getStringValue();
-				Method * m = c->getMethod(methodName);
+				Method * m = c->getMethod(methodName, i->getParam());
 				if(m && m->getParamCount() == i->getParam())
 				{
 					callMethod(c, m);
@@ -160,15 +169,19 @@ int Interpret::run()
 			case LOAD:
 			{
 				Object * o = fetchObject();
-				uint8_t field = currentFrame->nextByte();
-				currentFrame->push(o->getValue(field));
+				uint16_t field = currentFrame->nextShort();
+				ConstPoolItem * i = currentFrame->constants->getItem(field);
+				assert(i->getType() == FIELD_REF);
+				currentFrame->push(o->getValueByName(i->getStringValue()));
 				break;
 			}
 			case STORE:
 			{
 				Object * o = fetchObject();
-				uint8_t field = currentFrame->nextByte();
-				o->setValue(field, currentFrame->pop());
+				uint16_t field = currentFrame->nextShort();
+				ConstPoolItem * i = currentFrame->constants->getItem(field);
+				assert(i->getType() == FIELD_REF);
+				o->setValueByName(i->getStringValue(), currentFrame->pop());
 				break;
 			}
 			case LOAD_LOCAL:

@@ -16,7 +16,8 @@ enum ConstPoolTag
 	CLASS_REF = 2,
 	STRING_CONST = 3,
 	INT_CONST = 4,
-	REAL_CONST = 5
+	REAL_CONST = 5,
+	FIELD_REF = 6
 };
 
 #endif // BYTECODECONSTANTS_H

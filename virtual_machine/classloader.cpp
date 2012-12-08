@@ -46,8 +46,12 @@ Class * ClassLoader::loadClass(const char * className)
 	cl = new Class(name);
 	cl->setConstPool(loadConstantPool());
 	file.read((char *)&fieldCount, sizeof(uint8_t));
-	cl->setFieldCount(fieldCount);
 	cout << "field count = " << (int)fieldCount << endl;
+	for(uint8_t i = 0; i< fieldCount; i ++)
+	{
+		file.read(name, IDENTIFIER_LENGTH);
+		cl->addField(name);
+	}
 	file.read((char *)&methodCount, sizeof(uint8_t));
 	cout << "method count = " << (int)methodCount << endl;
 	for(uint8_t i = 0; i < methodCount; i ++)
@@ -164,18 +168,19 @@ void ClassLoader::addClass(Class * c)
 void ClassLoader::initBuiltInClasses()
 {
 	classTable[INT_CLASS] = new Class(INT_CLASS);
-	classTable[INT_CLASS]->setFieldCount(1);
+	classTable[INT_CLASS]->addField("value");
 
 	classTable[REAL_CLASS] = new Class(REAL_CLASS);
-	classTable[REAL_CLASS]->setFieldCount(1);
+	classTable[REAL_CLASS]->addField("value");
 	
 	classTable[STRING_CLASS] = new Class(STRING_CLASS);
-	classTable[STRING_CLASS]->setFieldCount(2);
+	classTable[STRING_CLASS]->addField("length");
+	classTable[STRING_CLASS]->addField("value");
 	
 	classTable[ARRAY_CLASS] = new Class(ARRAY_CLASS);
 	
 	classTable[FILE_CLASS] = new Class(FILE_CLASS);
-	classTable[FILE_CLASS]->setFieldCount(1);
+	classTable[FILE_CLASS]->addField("file");
 	classTable[FILE_CLASS]->addMethod(new FileOpen());
 	classTable[FILE_CLASS]->addMethod(new FileClose());
 	classTable[FILE_CLASS]->addMethod(new FileWrite());

@@ -29,6 +29,7 @@ uint32_t Memory::allocate(Class * cls)
 	if(fieldSpace > 0)
 	{
 		o.setFields((uint32_t *)(used + size));
+		memset(o.getFields(), -1, fieldSpace);
 		size += fieldSpace;
 	}
 	memcpy(used + size, &o, objectSize);
@@ -111,6 +112,7 @@ uint32_t Memory::allocateArray(Class * cls, uint32_t length)
 	if(space > 0)
 	{
 		o.setFields((uint32_t *)(used + size));
+		memset(o.getFields(), -1, space);
 		size += space;
 	}
 	memcpy(used + size, &o, objectSize);
@@ -209,6 +211,10 @@ void Memory::gc(StackFrame * stack)
 
 uint32_t Memory::moveObject(uint32_t ptr)
 {
+	if(ptr == VM_NULL)
+	{
+		return VM_NULL;
+	}
 	Object * o = (Object *)(used + ptr);
 	if(o->address == VM_NULL)
 	{

@@ -17,10 +17,11 @@ ConstantPool::~ConstantPool()
 	pool.clear();
 }
 
-void ConstantPool::addItem(ConstPoolStruct * item, ConstPoolTag type)
+int ConstantPool::addItem(ConstPoolStruct * item, ConstPoolTag type)
 {
 	ConstPoolItem * i = new ConstPoolItem(type, item);
 	pool.push_back(i);
+	return pool.size() - 1;
 }
 
 ConstPoolItem* ConstantPool::getItem(unsigned int i) const
@@ -61,6 +62,13 @@ ConstPoolItem::ConstPoolItem(ConstPoolTag type, ConstPoolStruct * data): type(ty
 		case REAL_CONST:
 		{
 			realValue = ((RealConst *) data)->value;
+		}
+		case FIELD_REF:
+		{
+			FieldRef * f = (FieldRef *) data;
+			string = new char[IDENTIFIER_LENGTH];
+			memcpy(string, f->name, IDENTIFIER_LENGTH);
+			break;
 		}
 	}
 }
