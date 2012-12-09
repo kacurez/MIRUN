@@ -64,11 +64,6 @@ int Interpret::run()
 				Class * cls = classLoader->getClass(i->getStringValue());
 				uint32_t ref = allocate(cls);
 				currentFrame->push(ref);
-				if(cls->hasMethod(cls->getName().c_str()))
-				{
-					callMethod(cls, cls->getMethod(cls->getName().c_str()));
-					currentFrame->push(ref);
-				}
 				break;
 			}	
 			case NEW_ARRAY:
