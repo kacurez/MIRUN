@@ -34,7 +34,7 @@ LETTER      [a-zA-Z_]
 "\n" {yylineno++;}
 
 
-
+"::" {return COLON_;}
 "}"  { return CURLY_CLOSE_; }
 "{"  { return CURLY_OPEN_; }
 "]"  { return SQUARE_CLOSE_; }
@@ -59,6 +59,7 @@ LETTER      [a-zA-Z_]
 "-=" { return MINUS_ASIGN; }
 "."  { return POINT_; }
 ","  { return COMMA; }
+
 
 L?\"(\\.|[^\\"])*\"	{ return STRING_LITERAL_; }
 {REAL}  {yylval.real = truncCreal(); return REAL_;}

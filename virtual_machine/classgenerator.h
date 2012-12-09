@@ -23,6 +23,14 @@ public:
 	void allocLocal(const char * name);
 	void emit(INSTRUCTION ins);
 	void emitNew(const char * className);
+  void emitNewArray(int size);
+  void storeArray(const char* name,int index)
+  {
+    emitPush(index);
+    loadLocal(name);
+    emit(STORE_ARRAY);
+  
+  }
 	/**
 	 * Emituje skok (jmp, if_*) na adresu.
 	 * @return ukazatel na pozici addr
@@ -41,7 +49,7 @@ public:
 	void loadLocal(const char * local);
 	void storeLocal(const char * local);
 	void finalizeClass();
-	
+	bool localExist(const char* local);
 	/**
 	 * Adresa pristi instrukce.
 	 */

@@ -57,6 +57,10 @@ void ClassGenerator::emitPush(const char * value)
 
 void ClassGenerator::allocLocal(const char * name)
 {
+//self has to be allocated at first ie at 0 position
+  if(locals.size() > 0 && strcmp(name,"self")==0)
+    throw "(Re)Allocating self on position that is greater than zero";
+     
 	locals[name] = locals.size();
 }
 
@@ -118,6 +122,11 @@ int ClassGenerator::emitJump(INSTRUCTION ins, int addr)
 	checkCodeSize();
 	code[nextInsAddress] = addr - nextInsAddress;
 	nextInsAddress ++;
+}
+void ClassGenerator::PushConstant(uint16_t constant)
+{
+
+
 }
 
 void ClassGenerator::emitCall(INSTRUCTION ins, const char * methodName, int paramCount, const char * className)
@@ -181,6 +190,13 @@ void ClassGenerator::loadMember(const char * local, const char * field)
 	emit2Byte(fieldNames[field]);
 }
 
+void ClassGenerator::storeArray(const char* name, int index)
+{
+  emitPush(index);
+  loadLocal(name);
+  emit(STORE_ARRAY);  
+}
+
 void ClassGenerator::storeMember(const char * local, const char * field)
 {
 	loadLocal(local);
@@ -195,12 +211,30 @@ void ClassGenerator::storeMember(const char * local, const char * field)
 	emit2Byte(fieldNames[field]);
 }
 
+bool ClassGenerator::localExist(const char* local)
+{
+   return locals.find(local) != locals.end();
+
+}
+
 void ClassGenerator::loadLocal(const char * local)
 {
 	emit(LOAD_LOCAL);
+  if(locals.find(local) == locals.end())
+    throw (std::string("Uknown local variable:") + local).c_str();
 	code[nextInsAddress ++] = locals[local];
 }
 
+void ClassGenerator::emitNewArray(int size)
+{
+  if(size < =0)
+    throw (std::string("Can not allocate an array with size <=0!!!");   
+    
+  emitPush(size);
+  emit(NEW_ARRAY);
+  
+  
+}
 void ClassGenerator::storeLocal(const char * local)
 {
 	emit(STORE_LOCAL);
