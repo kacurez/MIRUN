@@ -123,11 +123,6 @@ int ClassGenerator::emitJump(INSTRUCTION ins, int addr)
 	code[nextInsAddress] = addr - nextInsAddress;
 	nextInsAddress ++;
 }
-void ClassGenerator::PushConstant(uint16_t constant)
-{
-
-
-}
 
 void ClassGenerator::emitCall(INSTRUCTION ins, const char * methodName, int paramCount, const char * className)
 {
@@ -227,8 +222,8 @@ void ClassGenerator::loadLocal(const char * local)
 
 void ClassGenerator::emitNewArray(int size)
 {
-  if(size < =0)
-    throw (std::string("Can not allocate an array with size <=0!!!");   
+  if(size <= 0)
+    throw (std::string("Can not allocate an array with size <=0!!!")).c_str();   
     
   emitPush(size);
   emit(NEW_ARRAY);

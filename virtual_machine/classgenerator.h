@@ -24,13 +24,7 @@ public:
 	void emit(INSTRUCTION ins);
 	void emitNew(const char * className);
   void emitNewArray(int size);
-  void storeArray(const char* name,int index)
-  {
-    emitPush(index);
-    loadLocal(name);
-    emit(STORE_ARRAY);
-  
-  }
+  void storeArray(const char* name,int index);
 	/**
 	 * Emituje skok (jmp, if_*) na adresu.
 	 * @return ukazatel na pozici addr
