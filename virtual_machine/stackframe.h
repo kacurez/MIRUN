@@ -15,7 +15,7 @@ public:
 	void pushLocal(uint32_t index);
 	void storeLocal(uint32_t index);
 	uint32_t pop();
-	uint32_t top() const;
+	uint32_t top(uint32_t index = 1) const;
 	StackFrame * getParent() const;
 	void setLocal(uint32_t index, uint32_t item);
 	uint8_t nextByte();

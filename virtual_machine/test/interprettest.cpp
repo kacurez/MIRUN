@@ -180,8 +180,8 @@ void InterpretTest::callDynamicTest()
 		NEW, 0x00, 0x00, //new Counter
 		DUP, STORE_LOCAL, 0x00, //a = new Counter
 		CALL_DYNAMIC, 0x03, 0x00, //a.init
-		PUSH, 0x05, 0x00, //PUSH 3
 		LOAD_LOCAL, 0x00,
+		PUSH, 0x05, 0x00, //PUSH 3
 		CALL_DYNAMIC, 0x01, 0x00, //a.increase(3)
 		LOAD_LOCAL, 0x00,
 		CALL_DYNAMIC, 0x02, 0x00, //a.getValue

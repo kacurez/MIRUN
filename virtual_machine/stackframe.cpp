@@ -21,13 +21,13 @@ uint32_t StackFrame::pop()
 	return stack[-- stackPointer];
 }
 
-uint32_t StackFrame::top() const
+uint32_t StackFrame::top(uint32_t index) const
 {
 	if(stackPointer == 0)
 	{
 		throw "Stack underflow.";
 	}
-	return stack[stackPointer - 1];
+	return stack[stackPointer - index];
 }
 
 void StackFrame::push(uint32_t item)

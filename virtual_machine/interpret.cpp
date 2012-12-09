@@ -90,10 +90,10 @@ int Interpret::run()
 			}
 			case CALL_DYNAMIC:
 			{
-				Class * c = heap->getObject(currentFrame->top())->getType();
 				uint16_t methodNamePtr = currentFrame->nextShort();
 				ConstPoolItem * i = currentFrame->constants->getItem(methodNamePtr);
 				assert(i->getType() == METHOD_REF);
+				Class * c = heap->getObject(currentFrame->top(i->getParam()))->getType();
 				const char * methodName = i->getStringValue();
 				Method * m = c->getMethod(methodName, i->getParam());
 				if(m && m->getParamCount() == i->getParam())
@@ -174,9 +174,10 @@ int Interpret::run()
 			{
 				Object * o = fetchObject();
 				uint16_t field = currentFrame->nextShort();
+				uint32_t value = currentFrame->pop();
 				ConstPoolItem * i = currentFrame->constants->getItem(field);
 				assert(i->getType() == FIELD_REF);
-				o->setValueByName(i->getStringValue(), currentFrame->pop());
+				o->setValueByName(i->getStringValue(), value);
 				break;
 			}
 			case LOAD_LOCAL:
@@ -195,23 +196,24 @@ int Interpret::run()
 			case LOAD_ARRAY:
 			{
 				Object * o = fetchObject();
+				uint32_t index = fetchInteger();
 				if(o->getType() != classLoader->getClass(ARRAY_CLASS))
 				{
 					throw "Not an array.";
 				}
-				uint32_t index = fetchInteger();
 				currentFrame->push(o->getValue(index));
 				break;
 			}
 			case STORE_ARRAY:
 			{
 				Object * o = fetchObject();
+				uint32_t value = currentFrame->pop();
+				uint32_t index = fetchInteger();
 				if(o->getType() != classLoader->getClass(ARRAY_CLASS))
 				{
 					throw "Not an array.";
 				}
-				uint32_t index = fetchInteger();
-				o->setValue(index, currentFrame->pop());
+				o->setValue(index, value);
 				break;
 			}
 			case DUP:
@@ -275,17 +277,17 @@ void Interpret::doRealAritmetics(Object * op1, Object *  op2, INSTRUCTION i)
 	double left, right, result;
 	if(op1->getType() == classLoader->getClass(INT_CLASS))
 	{
-		left = op1->getValue(0);
+		right = op1->getValue(0);
 	} else
 	{
-		left = heap->getDoubleValue(op1->getValue(0));
+		right = heap->getDoubleValue(op1->getValue(0));
 	}
 	if(op2->getType() == classLoader->getClass(INT_CLASS))
 	{
-		right = op2->getValue(0);
+		left = op2->getValue(0);
 	} else
 	{
-		right = heap->getDoubleValue(op2->getValue(0));
+		left = heap->getDoubleValue(op2->getValue(0));
 	}
 	switch(i)
 	{
@@ -356,7 +358,7 @@ void Interpret::callMethod(Class * cls, Method * m)
 	} else
 	{
 		StackFrame * nextFrame = new StackFrame(m->getLocals() + m->getParamCount(), m->getCode(), cls->getConstantPool(), currentFrame);
-		for(int i = 0; i < m->getParamCount(); i ++)
+		for(int i = m->getParamCount() - 1; i >= 0 ; i --)
 		{
 			nextFrame->setLocal(i, currentFrame->pop());
 		}
