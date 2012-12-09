@@ -1,8 +1,10 @@
 #include "stackframe.h"
+#include <string.h>
 
 StackFrame::StackFrame(uint32_t localCount, const char * code, ConstantPool * constants, StackFrame * parent): code(code), constants(constants), programCounter(0), localCount(localCount), stackPointer(0), parent(parent)
 {
 	locals = new uint32_t[localCount];
+	memset(locals, VM_NULL, localCount * sizeof(uint32_t));
 }
 
 StackFrame::~StackFrame()

@@ -29,7 +29,7 @@ uint32_t Memory::allocate(Class * cls)
 	if(fieldSpace > 0)
 	{
 		o.setFields((uint32_t *)(used + size));
-		memset(o.getFields(), -1, fieldSpace);
+		memset(o.getFields(), VM_NULL, fieldSpace);
 		size += fieldSpace;
 	}
 	memcpy(used + size, &o, objectSize);
@@ -112,7 +112,7 @@ uint32_t Memory::allocateArray(Class * cls, uint32_t length)
 	if(space > 0)
 	{
 		o.setFields((uint32_t *)(used + size));
-		memset(o.getFields(), -1, space);
+		memset(o.getFields(), VM_NULL, space);
 		size += space;
 	}
 	memcpy(used + size, &o, objectSize);
