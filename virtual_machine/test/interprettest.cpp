@@ -32,7 +32,6 @@ void InterpretTest::aritmeticTest()
 		DIV,
 		INC,
 		DEC,
-		INC,
 		RET
 	};
 	Method * m = initMethod("aritmeticTest", code, sizeof(code), 0, 0, 0);
@@ -45,7 +44,7 @@ void InterpretTest::aritmeticTest()
 	pool->addItem(&i, INT_CONST);
 	cls->addMethod(m);
 	cl.addClass(cls);
-	assert(1 == instance.run(cls->getName().c_str(), m->getName().c_str()));
+	assert(30 == instance.run(cls->getName().c_str(), m->getName().c_str()));
 }
 
 void InterpretTest::jumpTest()
@@ -340,8 +339,8 @@ void InterpretTest::arrayTest()
 		STORE_LOCAL, 0x00,
 		PUSH, 0x00, 0x00,
 		STORE_LOCAL, 0x01, // i = 0
-		PUSH, 0x01, 0x00, //label1
-		LOAD_LOCAL, 0x01,
+		LOAD_LOCAL, 0x01, //label1
+		PUSH, 0x01, 0x00,
 		SUB,
 		IF_GE, 0x0C,//if(i < 10)
 		LOAD_LOCAL, 0x01,
@@ -355,8 +354,8 @@ void InterpretTest::arrayTest()
 		PUSH, 0x00, 0x00,
 		STORE_LOCAL, 0x01,
 		STORE_LOCAL, 0x02,
-		PUSH, 0x01, 0x00, //label2
-		LOAD_LOCAL, 0x01,
+		LOAD_LOCAL, 0x01, //label2
+		PUSH, 0x01, 0x00,
 		SUB,
 		IF_GE, 17,//if(i < 10)
 		LOAD_LOCAL, 0x01,
@@ -379,7 +378,7 @@ void InterpretTest::arrayTest()
 	i.value = 0;
 	pool->addItem(&i, INT_CONST);//0
 	i.value = 10;
-	pool->addItem(&i, INT_CONST);//0
+	pool->addItem(&i, INT_CONST);//1
 	cls->addMethod(m);
 	cl.addClass(cls);
 	assert(45 == instance.run(cls->getName().c_str(), m->getName().c_str()));

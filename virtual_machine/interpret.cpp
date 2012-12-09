@@ -243,16 +243,16 @@ Object * Interpret::fetchObject()
 
 void Interpret::doAritmetics(INSTRUCTION i)
 {
-	Object * op1 = fetchObject();
-	Object * op2 = fetchObject();
-	checkNumber(op1);
-	checkNumber(op2);
-	if(op1->getType() == classLoader->getClass(REAL_CLASS) ||  op2->getType() == classLoader->getClass(REAL_CLASS))
+	Object * right = fetchObject();
+	Object * left = fetchObject();
+	checkNumber(left);
+	checkNumber(right);
+	if(left->getType() == classLoader->getClass(REAL_CLASS) ||  right->getType() == classLoader->getClass(REAL_CLASS))
 	{
-		doRealAritmetics(op1, op2, i);
+		doRealAritmetics(left, right, i);
 	} else
 	{
-		doIntAritmetics(op1, op2, i);
+		doIntAritmetics(left, right, i);
 	}
 }
 
@@ -277,17 +277,17 @@ void Interpret::doRealAritmetics(Object * op1, Object *  op2, INSTRUCTION i)
 	double left, right, result;
 	if(op1->getType() == classLoader->getClass(INT_CLASS))
 	{
-		right = op1->getValue(0);
+		left = op1->getValue(0);
 	} else
 	{
-		right = heap->getDoubleValue(op1->getValue(0));
+		left = heap->getDoubleValue(op1->getValue(0));
 	}
 	if(op2->getType() == classLoader->getClass(INT_CLASS))
 	{
-		left = op2->getValue(0);
+		right = op2->getValue(0);
 	} else
 	{
-		left = heap->getDoubleValue(op2->getValue(0));
+		right = heap->getDoubleValue(op2->getValue(0));
 	}
 	switch(i)
 	{
