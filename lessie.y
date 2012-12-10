@@ -198,14 +198,14 @@ iterationInstruction : FOR PAR_OPEN_ optionalExpression SEMICOLON_
 		     optionalExpression
 		     {    
 		       //jump back to start end evaluate condition
-		       generator.emitSimpleJump(JMP, generator.nextInsAddress - $<forHelper>5.label);
+		       generator.emitSimpleJump(JMP, $<forHelper>5.label - generator.nextInsAddress - 2);
                        // complete jump from expression to body:
                        generator.completeAddress($<forHelper>9.ref);
                         }
 		     PAR_CLOSE_  instruction
 		     {
 		      // jump to optExpression
-		      generator.emitSimpleJump(JMP, $<forHelper>9.label - generator.nextInsAddress);
+		      generator.emitSimpleJump(JMP, $<forHelper>9.label - generator.nextInsAddress - 2);
                       // complete jump for false expression evaluation - ie end of for cycle
                       generator.completeAddress($<forHelper>7.ref);
 		     }
@@ -375,7 +375,7 @@ actualParameterList : expression
 /*asignationOperator : ASIGN | ADD_ASIGN | MINUS_ASIGN ;*/
 equalityOperator : EQUAL{$$=IF_EQ;} | NOT_EQUAL{$$=IF_NE;};
 relationalOperator : GREATER {$$=IF_GT;} | LESS {$$=IF_LT;}| GREATER_EQUAL {$$=IF_GE;}| LESS_EQUAL {$$=IF_LE;};
-additiveOperator : PLUS {$$ = PLUS;}| MINUS{$$ = SUB;};
+additiveOperator : PLUS {$$ = ADD;}| MINUS{$$ = SUB;};
 multiplicativeOperator : MULT {$$ = MUL;} | DIV_ {$$ = DIV;};
 incrementOperator : INC_ {$$ = INC;} | DEC_ {$$ = DEC;};
 unaryOperator : PLUS {$$ = 1;}| MINUS {$$ = -1;};

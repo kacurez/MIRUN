@@ -3,9 +3,46 @@
 #include <stdio.h>
 #include <sstream>
 #include <iostream>
-#define INIT_CODE_SIZE 1024
+#define INIT_CODE_SIZE 100000
 
 using namespace std;
+
+//#define DEBUG_CODE
+
+#ifdef DEBUG_CODE
+const char * mnemonics[] = {
+	"ADD",
+	"SUB",
+	"MUL",
+	"DIV",
+	"CMP_EQ",
+	"CMP_NE",
+	"INC",
+	"DEC",
+	"NEW",
+	"NEW_ARRAY",
+	"JMP",
+	"CALL",
+	"RET",
+	"RET_VOID",
+	"IF_EQ",
+	"IF_GT",
+	"IF_LT",
+	"IF_GE",
+	"IF_LE",	
+	"IF_NE",
+	"PUSH",
+	"LOAD",
+	"STORE",
+	"LOAD_LOCAL",
+	"STORE_LOCAL",
+	"POP",
+	"CALL_DYNAMIC",
+	"LOAD_ARRAY",
+	"STORE_ARRAY",
+	"DUP"
+};
+#endif
 
 ClassGenerator::ClassGenerator(): code(new char[INIT_CODE_SIZE]), maxCode(INIT_CODE_SIZE)
 {
@@ -112,6 +149,14 @@ void ClassGenerator::setClassName(const char * name)
 
 void ClassGenerator::emit(INSTRUCTION ins)
 {
+#ifdef DEBUG_CODE
+	const char *tmp = mnemonics[ins];
+	checkCodeSize(50);
+	sprintf(code + nextInsAddress, "%s", tmp);
+	nextInsAddress += strlen(tmp);
+	return;
+#endif
+	
 	checkCodeSize();
 	code[nextInsAddress ++] = ins;
 }
@@ -137,6 +182,7 @@ void ClassGenerator::completeAddress(int addr)
 void ClassGenerator::emitSimpleJump(INSTRUCTION ins, int addr)
 {
  emit(ins);
+ checkCodeSize();
  code[nextInsAddress ++] = addr;
 }
 int ClassGenerator::emitNonCompleteJump(INSTRUCTION ins)
@@ -240,7 +286,7 @@ bool ClassGenerator::localExist(const char* local)
 void ClassGenerator::loadLocal(const char * local)
 {
 	emit(LOAD_LOCAL);
-	cout << "loadLoacal(" << local << ")" << endl;
+	cout << "loadLocal(" << local << ")" << endl;
   if(locals.find(local) == locals.end())
     throw (std::string("Uknown local variable:") + local).c_str();
 	code[nextInsAddress ++] = locals[local];

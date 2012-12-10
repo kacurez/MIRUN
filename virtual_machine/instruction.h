@@ -39,36 +39,5 @@ enum INSTRUCTION  {
 	STORE_ARRAY,
 	DUP
 };
-/*
-const char * mnemonics[] = {
-	"ADD",
-	"SUB",
-	"MUL",
-	"DIV",
-	"CMP_EQ",
-	"CMP_NE",
-	"INC",
-	"DEC",
-	"NEW",
-	"NEW_ARRAY",
-	"JMP",
-	"CALL",
-	"RET",
-	"RET_VOID",
-	"IF_EQ",
-	"IF_GT",
-	"IF_LT",
-	"IF_GE",
-	"IF_LE",	
-	"IF_NE",
-	"PUSH",
-	"LOAD",
-	"STORE",
-	"LOAD_LOCAL",
-	"STORE_LOCAL",
-	"POP",
-	"CALL_DYNAMIC",
-	"LOAD_ARRAY",
-	"STORE_ARRAY"
-};*/
+
 #endif
