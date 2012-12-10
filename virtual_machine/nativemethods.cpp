@@ -150,7 +150,7 @@ public:
 		}
 		uint32_t file = heap->createFile(heap->getStringValue(fileName->getValue(1)));
 		self->setValue(0, file);
-		return file;
+		return VM_NULL;
 	}
 	
 };

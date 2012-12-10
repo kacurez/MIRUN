@@ -243,6 +243,10 @@ bool Memory::isSpace(uint32_t requested) const
 
 void Memory::moveField(Object * o, uint32_t field, uint32_t fieldSize)
 {
+	if(o->getValue(field) == VM_NULL)
+	{
+		return;
+	}
 	memcpy(empty + size, used + o->getValue(field), fieldSize);
 	o->setValue(field, size);
 	size += fieldSize;

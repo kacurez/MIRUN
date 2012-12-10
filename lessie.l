@@ -129,7 +129,6 @@ try{
   }
   --argc; 
   n++;
-  printf("starting..");
   if (argc == n) {
     if((yyin = fopen (argv[argc], "r")) == NULL) 
         fprintf(stderr, "Invalid file %s\n", argv[argc]);
