@@ -5,6 +5,8 @@
 #include <iostream>
 #define INIT_CODE_SIZE 1024
 
+using namespace std;
+
 ClassGenerator::ClassGenerator(): code(new char[INIT_CODE_SIZE]), maxCode(INIT_CODE_SIZE)
 {
   std::cout << "ctor" << std::endl;
@@ -46,6 +48,7 @@ void ClassGenerator::emitPush(int value)
 void ClassGenerator::emitPush(const char * value)
 {
 	emit(PUSH);
+	cout << "push(\"" << value << "\")";
 	if(stringConst.find(value) == stringConst.end())
 	{
 		StringConst s;
@@ -63,22 +66,30 @@ void ClassGenerator::allocLocal(const char * name)
 //self has to be allocated at first ie at 0 position
   if(locals.size() > 0 && strcmp(name,"self")==0)
     throw "(Re)Allocating self on position that is greater than zero";
-     
-	locals[name] = locals.size();
+	
+	uint8_t local = locals.size();
+	locals[name] = local;
 }
 
 void ClassGenerator::finalizeMethod()
 {
+	cout << "finalizeMethod(): codeSize = " << nextInsAddress << ", locals = " << locals.size() << endl; 
+	if(code[nextInsAddress -1] != RET && code[nextInsAddress -1] != RET_VOID)
+	{
+		code[nextInsAddress ++] = RET_VOID;
+	}
 	method->setCode(code, nextInsAddress);
 	method->setLocals(locals.size());
 	method->setFlag(0);
 }
 void ClassGenerator::setParamsCountForCurrentMethod(int count)
 {
+	cout << "setParamsForCurrentMethod(" << count << ")\n";
   method->setParamCount(count);
 }
 void ClassGenerator::createMethod(const char * name, int paramCount)
 {
+	cout << "createMethod(" << name << ")\n";
 	method = new Method(name);
 	method->setParamCount(paramCount);
 	cls->addMethod(method);
@@ -88,12 +99,12 @@ void ClassGenerator::createMethod(const char * name, int paramCount)
 
 void ClassGenerator::addField(const char * name)
 {
-  std::cout << "setting class name" << std::endl;
-	cls->addField(name);
+	cout << "setting field: " <<  name << " = " << (int) (cls->addField(name));
 }
 
 void ClassGenerator::setClassName(const char * name)
 {
+	cout << "setClassName(" << name << ")\n";
 	cls = new Class(name);
 	pool = new ConstantPool();
 	cls->setConstPool(pool);
@@ -120,7 +131,7 @@ void ClassGenerator::emitNew(const char * className)
 
 void ClassGenerator::completeAddress(int addr)
 {
-	code[addr] = addr - nextInsAddress;
+	code[addr] = nextInsAddress - addr - 1;
 }
 
 void ClassGenerator::emitSimpleJump(INSTRUCTION ins, int addr)
@@ -135,17 +146,10 @@ int ClassGenerator::emitNonCompleteJump(INSTRUCTION ins)
   return nextInsAddress++;
 }
 
-int ClassGenerator::emitJump(INSTRUCTION ins, int addr)
-{
-	emit(ins);
-	checkCodeSize();
-	code[nextInsAddress] = addr - nextInsAddress;
-	nextInsAddress ++;
-}
-
 void ClassGenerator::emitCall(INSTRUCTION ins, const char * methodName, int paramCount, const char * className)
 {
 	emit(ins);
+	cout << "emitCall: ";
 	if(ins == CALL)
 	{
 		if(classNames.find(className) == classNames.end())
@@ -155,12 +159,13 @@ void ClassGenerator::emitCall(INSTRUCTION ins, const char * methodName, int para
 			sprintf(cr.name, "%s", className);
 			classNames[className] = pool->addItem(&cr, CLASS_REF);
 		}
+		cout << "static classs: " << className << "[" << classNames[className] << "]::";
 		emit2Byte(classNames[className]);
 		
 	}
 	std::stringstream ss;
 	ss << methodName << "(" << paramCount << ")";
-	if(methodNames.find(ss.str()) == classNames.end())
+	if(methodNames.find(ss.str()) == methodNames.end())
 	{
 		MethodRef mr;
 		mr.params = paramCount;
@@ -168,6 +173,7 @@ void ClassGenerator::emitCall(INSTRUCTION ins, const char * methodName, int para
 		sprintf(mr.name, "%s", methodName);
 		methodNames[ss.str()] = pool->addItem(&mr, METHOD_REF);
 	}
+	cout << ss.str() << "[" << methodNames[ss.str()] << "]" << endl;
 	emit2Byte(methodNames[ss.str()]);
 }
 
@@ -234,6 +240,7 @@ bool ClassGenerator::localExist(const char* local)
 void ClassGenerator::loadLocal(const char * local)
 {
 	emit(LOAD_LOCAL);
+	cout << "loadLoacal(" << local << ")" << endl;
   if(locals.find(local) == locals.end())
     throw (std::string("Uknown local variable:") + local).c_str();
 	code[nextInsAddress ++] = locals[local];
@@ -257,8 +264,9 @@ void ClassGenerator::storeLocal(const char * local)
 
 void ClassGenerator::finalizeClass()
 {
+	std::string filename = cls->getName() + ".lessie";
 	std::fstream file;
-	file.open(cls->getName().c_str(),  std::ios::out | std::ios::binary);
+	file.open(filename.c_str(),  std::ios::out | std::ios::binary);
 	writeIdent(file, cls->getName().c_str());
 	writeConstantPool(file);
 	uint8_t fieldCount = cls->getFieldCount();

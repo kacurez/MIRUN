@@ -31,11 +31,6 @@ public:
   //emits IF_|JUMP instruction and returns addres of the relative offset placement, call CompleteAddress to fill the offset after
   int emitNonCompleteJump(INSTRUCTION ins);
 	/**
-	 * Emituje skok (jmp, if_*) na adresu.
-	 * @return ukazatel na pozici addr
-	 */
-	int emitJump(INSTRUCTION ins, int addr = 0);
-	/**
 	 * Upravi hodnotu na pozici add, aby skocila na adresu pristi instrukce.
 	 */
 	void completeAddress(int addr);
@@ -71,7 +66,7 @@ private:
 	std::map<std::string, uint16_t> classNames;
 	std::map<std::string, uint16_t> methodNames;
 	std::map<std::string, uint16_t> fieldNames;
-	std::map<std::string, uint16_t> locals;
+	std::map<std::string, uint8_t> locals;
 	std::map<int, uint16_t> intConst;
 	std::map<double, uint16_t> doubleConst;
 	std::map<std::string, uint16_t> stringConst;

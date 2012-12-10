@@ -15,6 +15,11 @@ public:
 	
 	uint32_t run(Memory * heap)
 	{
+		if(params[0] == VM_NULL)
+		{
+			std::cout << "null" << std::endl;
+			return VM_NULL;
+		}
 		Object * o = heap->getObject(params[0]);
 		std::string className = o->getType()->getName();
 		if(className == INT_CLASS)

@@ -188,8 +188,8 @@ void InterpretTest::callDynamicTest()
 	};
 	Method * m = initMethod("callTest", code, sizeof(code), 0, 1, 0);
 	Method * m1 = initMethod("increase", code1, sizeof(code1), 2, 0, 1);
-	Method * m2 = initMethod("getValue", code2, sizeof(code2), 1, 0, 1);
-	Method * m3 = initMethod("init", code3, sizeof(code3), 1, 0, 1);
+	Method * m2 = initMethod("getValue", code2, sizeof(code2), 1, 1, 1);
+	Method * m3 = initMethod("init", code3, sizeof(code3), 1, 1, 1);
 	ClassLoader cl("");
 	Interpret instance(&cl);
 	ClassRef cr;

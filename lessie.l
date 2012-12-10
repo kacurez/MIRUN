@@ -62,7 +62,7 @@ LETTER      [a-zA-Z_]
 ","  { return COMMA; }
 
 
-L?\"(\\.|[^\\"])*\"	{ return STRING_LITERAL_; }
+L?\"(\\.|[^\\"])*\"	{ yylval.string_literal = createStringLiteral(); return STRING_LITERAL_; }
 {REAL}  {yylval.real = truncCreal(); return REAL_;}
 {DIGIT}+ { yylval.integer =createCnumber(); return CTI_; }
 {LETTER}({LETTER}|{DIGIT})* {  yylval.id = createId(); return ID_; }
@@ -83,8 +83,12 @@ char* createStringLiteral()
 {
 int newLen = yyleng - 2;
 char *buffer = (char*)malloc(newLen + 1); 
-strncpy(buffer, yytext + 1, newLen);
-buffer[newLen] = '\0';
+for(int i = 0; i < newLen; i ++)
+{
+	buffer[i] = yytext[i + 1];
+}
+//strncpy(buffer, yytext + 1, newLen);
+buffer[newLen] = 0;
 return buffer;
 }
 
@@ -115,8 +119,7 @@ int createCnumber()
   
 /*MAIN*/
 int main(int argc, char **argv) {
-  fprintf(stdout,"asdasd");
-  return 0;
+try{
   char *fileName;
   int i, n = 0;
   for(i = 0; i<argc; ++i) {
@@ -138,7 +141,10 @@ int main(int argc, char **argv) {
      }
    }
    else fprintf(stderr, "Usage: lessie [-v] [-t] file\n");
-
+   } catch(const char * ex)
+   {
+   printf("%s", ex);
+   }
   return 0;
 }
 

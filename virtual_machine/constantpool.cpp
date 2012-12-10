@@ -58,6 +58,7 @@ ConstPoolItem::ConstPoolItem(ConstPoolTag type, ConstPoolStruct * data): type(ty
 			StringConst * s = (StringConst *) data;
 			string = new char[s->length];
 			memcpy(string, s->value, s->length);
+			intValue = s->length;
 			break;
 		}
 		case INT_CONST:

@@ -1,4 +1,32 @@
 class aaa
 {
-var a;
+	var member;
+	
+	def aaa()
+	{
+		member = 5;
+	}
+	
+	def main()
+	{
+		var a;
+		var b[10];
+		var i;
+//		a = 1;
+//		console::print(a);
+//		if(a == 2)
+//		{
+//			console::print("a == 1");
+//		}
+//		else
+//		{
+//			console::print("a != 1");
+//		}
+		for(i = 0; 
+			i < 10; 
+			i = i + 1)
+		{
+//			console::print(b[i]);
+		}
+	}
 }

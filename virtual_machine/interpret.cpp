@@ -357,7 +357,7 @@ void Interpret::callMethod(Class * cls, Method * m)
 		}
 	} else
 	{
-		StackFrame * nextFrame = new StackFrame(m->getLocals() + m->getParamCount(), m->getCode(), cls->getConstantPool(), currentFrame);
+		StackFrame * nextFrame = new StackFrame(m->getLocals(), m->getCode(), cls->getConstantPool(), currentFrame);
 		for(int i = m->getParamCount() - 1; i >= 0 ; i --)
 		{
 			nextFrame->setLocal(i, currentFrame->pop());

@@ -78,9 +78,11 @@ uint8_t Class::getFieldIndex(const char * name)
 	return fields[name];
 }
 
-void Class::addField(const char * name)
+uint8_t Class::addField(const char * name)
 {
-	fields[name] = fields.size();
+	uint8_t index = fields.size();
+	fields[name] = index;
+	return fields[name];
 }
 
 bool Class::hasMethod(const char * name) const

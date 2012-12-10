@@ -75,7 +75,7 @@ Method * ClassLoader::loadMethod()
 	file.read((char *)&paramCount, sizeof(uint8_t));
 	m->setParamCount(paramCount);
 	file.read((char *)&localCount, sizeof(uint8_t));
-	m->setParamCount(localCount);
+	m->setLocals(localCount);
 	file.read((char *)&codeSize, sizeof(uint16_t));
 	code = new char[codeSize];
 	file.read(code, codeSize);
@@ -161,7 +161,7 @@ ConstantPool * ClassLoader::loadConstantPool()
 string ClassLoader::getFileName(const char * className)
 {
 	string filename = folder;
-	filename.append("/").append(className).append(".lessie");
+	filename.append(className).append(".lessie");
 	return filename;
 }
 

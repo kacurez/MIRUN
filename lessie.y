@@ -62,7 +62,7 @@ ClassGenerator generator;
 %token RETURN
 %right POINT_
 %token COMMA
-%right PAR_OPEN_ PAR_CLOSE_
+%left PAR_OPEN_ PAR_CLOSE_
 
 %type<integer> formalParameterList;
 %type<integer> formalParameters;
@@ -153,13 +153,14 @@ variableDeclaration : VAR_ ID_ SEMICOLON_
 		    ; 
 instructionList : /* eps */  | instructionList instruction ;
 instruction : CURLY_OPEN_ localVariableDeclaration instructionList CURLY_CLOSE_ |
-                expressionInstruction |assignExpression  | selectionInstruction | iterationInstruction | returnInstruction;
+                expressionInstruction |assignExpression SEMICOLON_ | selectionInstruction | iterationInstruction | returnInstruction;
 expressionInstruction : SEMICOLON_ | expression SEMICOLON_;
 
 selectionInstruction : IF PAR_OPEN_ expression PAR_CLOSE_
 		     {
 		       /*emit jump for false eval ie if expression <= 0*/
 		       generator.emitPush(0);
+		       generator.emit(SUB);
 		       $<hasRef>$ = generator.emitNonCompleteJump(IF_LE);//emit conditional jump to the else part
 		     
 		     }instruction 
@@ -182,6 +183,7 @@ iterationInstruction : FOR PAR_OPEN_ optionalExpression SEMICOLON_
 		     expression 
 		     {
 		      generator.emitPush(0);
+		      generator.emit(SUB);
 		      //create jmp instruction from here to final - in case of false expression evaluation
 		      $<forHelper>$.ref = generator.emitNonCompleteJump(IF_LE);
 
@@ -203,13 +205,14 @@ iterationInstruction : FOR PAR_OPEN_ optionalExpression SEMICOLON_
 		     PAR_CLOSE_  instruction
 		     {
 		      // jump to optExpression
-		      generator.emitSimpleJump(JMP, generator.nextInsAddress - $<forHelper>9.label);
+		      generator.emitSimpleJump(JMP, $<forHelper>9.label - generator.nextInsAddress);
                       // complete jump for false expression evaluation - ie end of for cycle
                       generator.completeAddress($<forHelper>7.ref);
 		     }
 		     ;
-optionalExpression : /* eps */ | expression;
-returnInstruction : RETURN expression SEMICOLON_ 
+optionalExpression : /* eps */ | assignExpression;
+returnInstruction :  
+RETURN expression SEMICOLON_ 
 		  {
 		  generator.emit(RET);
 		  }
@@ -221,15 +224,15 @@ returnInstruction : RETURN expression SEMICOLON_
 
 
 
-assignExpression: ID_ ASSIGN expression SEMICOLON_
+assignExpression: ID_ ASSIGN expression 
 		{
 		  generator.storeLocal($1); 		    	
 		}
-		|ID_ POINT_ ID_ ASSIGN expression SEMICOLON_
+		|ID_ POINT_ ID_ ASSIGN expression 
 		{
 		  generator.storeMember($1,$3);
 		}
-		| ID_ SQUARE_OPEN_ expression SQUARE_CLOSE_ ASSIGN expression SEMICOLON_
+		| ID_ SQUARE_OPEN_ expression SQUARE_CLOSE_ ASSIGN expression 
 		{
 		  //TODO: CHANGE ORDER OF PARAMETERS FOR STORE ARRAY IN VM: [index, value, arrayRef] <- TOP
 		  generator.loadLocal($1);

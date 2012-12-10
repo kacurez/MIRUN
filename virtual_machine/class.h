@@ -22,7 +22,7 @@ public:
 	int getFieldCount() const;
 	void setConstPool(ConstantPool * pool);
 	ConstantPool * getConstantPool() const;
-	void addField(const char * name);
+	uint8_t addField(const char * name);
 	uint8_t getFieldIndex(const char * name);
 	std::string getFieldName(uint8_t field) const;
 	uint8_t getMethodCount() const;
