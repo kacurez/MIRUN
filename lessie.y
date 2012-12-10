@@ -221,15 +221,15 @@ returnInstruction : RETURN expression SEMICOLON_
 
 
 
-assignExpression: ID_ ASSIGN expression
+assignExpression: ID_ ASSIGN expression SEMICOLON_
 		{
 		  generator.storeLocal($1); 		    	
 		}
-		|ID_ POINT_ ID_ ASSIGN expression
+		|ID_ POINT_ ID_ ASSIGN expression SEMICOLON_
 		{
 		  generator.storeMember($1,$3);
 		}
-		| ID_ SQUARE_OPEN_ expression SQUARE_CLOSE_ ASSIGN expression
+		| ID_ SQUARE_OPEN_ expression SQUARE_CLOSE_ ASSIGN expression SEMICOLON_
 		{
 		  //TODO: CHANGE ORDER OF PARAMETERS FOR STORE ARRAY IN VM: [index, value, arrayRef] <- TOP
 		  generator.loadLocal($1);
