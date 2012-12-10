@@ -16,8 +16,9 @@ machine: $(MACHINEOBJECTS)
 	$(CC) $(MACHINEOBJECTS)  -I./virtual_machine $(CFLAGS) -o $(machine)
 
 batoh: compiler
-	$(compiler) item.c problem.c solution.c  
-	   
+	./$(compiler) item.c 
+	./$(compiler) problem.c 
+	./$(compiler) solution.c 	   
 
 all: compiler machine batoh
  
