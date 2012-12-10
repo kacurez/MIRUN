@@ -62,7 +62,11 @@ public:
 	{
 		int32_t val;
 		std::cin >> val;
-		return heap->allocateNumber(integer, val);
+		if(std::cin.good())
+		{
+			return heap->allocateNumber(integer, val);
+		}
+		return VM_NULL;
 	}
 	
 private:
@@ -81,7 +85,11 @@ public:
 	{
 		double val;
 		std::cin >> val;
-		return heap->allocateNumber(real, val);
+		if(std::cin.good())
+		{
+			return heap->allocateNumber(real, val);
+		}
+		return VM_NULL;
 	}
 	
 private:
