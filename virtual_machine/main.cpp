@@ -1,24 +1,8 @@
 #include <iostream>
 #include "classloader.h"
 #include "interpret.h"
-#include "test/interprettest.h"
 
 using namespace std;
-
-void runTests()
-{
-	ClassLoader cl("data");
-	cl.getClass("MyClass");
-	InterpretTest test;
-	test.aritmeticTest();
-	test.jumpTest();
-	test.callTest();
-	test.callDynamicTest();
-	test.localsTest();
-	test.consoleTest();
-	test.arrayTest();
-	test.gcTest();
-}
 
 int main(int argc, char ** argv)
 {

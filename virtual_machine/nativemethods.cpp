@@ -17,6 +17,37 @@ public:
 	{
 		if(params[0] == VM_NULL)
 		{
+			std::cout << "null";
+			return VM_NULL;
+		}
+		Object * o = heap->getObject(params[0]);
+		std::string className = o->getType()->getName();
+		if(className == INT_CLASS)
+		{
+			std::cout << o->getValue(0);
+		} else if(className == REAL_CLASS)
+		{
+			std::cout << heap->getDoubleValue(o->getValue(0));
+		} else if(className == STRING_CLASS)
+		{
+			std::cout << heap->getStringValue(o->getValue(1));
+		}
+		return VM_NULL;
+	}
+};
+
+class Println: public NativeMethod
+{
+public:
+	Println(): NativeMethod("println")
+	{
+		setParamCount(1);
+	}
+	
+	uint32_t run(Memory * heap)
+	{
+		if(params[0] == VM_NULL)
+		{
 			std::cout << "null" << std::endl;
 			return VM_NULL;
 		}
@@ -112,7 +143,7 @@ public:
 	uint32_t run(Memory * heap)
 	{
 		Object * self = heap->getObject(params[0]);
-		Object * fileName = heap->getObject(params[0]);
+		Object * fileName = heap->getObject(params[1]);
 		if(self->getType()->getName() != FILE_CLASS || fileName->getType()->getName() != STRING_CLASS)
 		{
 			throw "Invalid parameter type for file open.";
@@ -165,7 +196,7 @@ public:
 		char buffer[256];
 		while(true)
 		{
-			fgets(buffer, sizeof(buffer), file);
+			fgets(buffer, 256, file);
 			unsigned int len = strlen(buffer);
 			if(buffer[len - 1] == '\n')
 			{
@@ -263,3 +294,47 @@ public:
 		return VM_NULL;
 	}
 };
+
+class IsNull: public NativeMethod
+{
+public:
+	IsNull(Class * integer): NativeMethod("isNull"), integer(integer)
+	{
+		setParamCount(1);
+	}
+	
+	uint32_t run(Memory * heap)
+	{
+		if(params[0] == VM_NULL)
+		{
+			return heap->allocateNumber(integer, 1);
+		} else
+		{
+			return heap->allocateNumber(integer, 0);
+		}
+	}
+private:
+	Class * integer;
+};
+
+class ArraySize: public NativeMethod
+{
+public:
+	ArraySize(Class * integer): NativeMethod("size"), integer(integer)
+	{
+		setParamCount(1);
+	}
+	
+	uint32_t run(Memory * heap)
+	{
+		Object * self = heap->getObject(params[0]);
+		if(self->getType()->getName() != ARRAY_CLASS)
+		{
+			throw "Not an array.";
+		}
+		return heap->allocateNumber(integer, (int32_t)self->getFieldCount());
+	}
+private:
+	Class * integer;
+};
+

@@ -2,7 +2,7 @@
 #include "bytecodeconstants.h"
 #include <string.h>
 
-#define MEMORY_SIZE 10000
+#define MEMORY_SIZE 1000000
 
 using namespace std;
 
@@ -87,7 +87,7 @@ uint32_t Memory::allocateNumber(Class * cls, int32_t value)
 
 uint32_t Memory::allocateString(Class * cls, const char * value)
 {
-	unsigned int length = strlen(value);
+	unsigned int length = strlen(value) + 1;
 	uint32_t ptr = allocate(cls);
 	if(ptr ==VM_NULL || !isSpace(length))
 	{
@@ -145,7 +145,9 @@ FILE * Memory::getFileStream(uint32_t file)
 	{
 		throw "No such file descriptor.";
 	}
-	return (FILE *)(used + file);
+	FILE * ret;
+	memcpy(&ret, used + file, sizeof(FILE *));
+	return ret;
 }
 
 uint32_t Memory::createFile(const char * fileName)

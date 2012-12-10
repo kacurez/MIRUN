@@ -346,7 +346,7 @@ void Interpret::callMethod(Class * cls, Method * m)
 	if(m->isNative())
 	{
 		NativeMethod * nm = dynamic_cast<NativeMethod *>(m);
-		for(int i = 0; i < m->getParamCount(); i ++)
+		for(int i = m->getParamCount() - 1; i >= 0 ; i --)
 		{
 			nm->setParam(i, currentFrame->pop());
 		}

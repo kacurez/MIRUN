@@ -46,7 +46,7 @@ const char * mnemonics[] = {
 
 ClassGenerator::ClassGenerator(): code(new char[INIT_CODE_SIZE]), maxCode(INIT_CODE_SIZE)
 {
-  std::cout << "ctor" << std::endl;
+//  std::cout << "ctor" << std::endl;
 	//ctor
 }
 
@@ -85,11 +85,11 @@ void ClassGenerator::emitPush(int value)
 void ClassGenerator::emitPush(const char * value)
 {
 	emit(PUSH);
-	cout << "push(\"" << value << "\")";
+//	cout << "push(\"" << value << "\")";
 	if(stringConst.find(value) == stringConst.end())
 	{
 		StringConst s;
-		s.length = strlen(value);
+		s.length = strlen(value) + 1;
 		s.value = new char[s.length];
 		memcpy(s.value, value, s.length);
 		stringConst[value] = pool->addItem(&s, STRING_CONST);
@@ -110,7 +110,7 @@ void ClassGenerator::allocLocal(const char * name)
 
 void ClassGenerator::finalizeMethod()
 {
-	cout << "finalizeMethod(): codeSize = " << nextInsAddress << ", locals = " << locals.size() << endl; 
+//	cout << "finalizeMethod(): codeSize = " << nextInsAddress << ", locals = " << locals.size() << endl; 
 	if(code[nextInsAddress -1] != RET && code[nextInsAddress -1] != RET_VOID)
 	{
 		code[nextInsAddress ++] = RET_VOID;
@@ -121,12 +121,12 @@ void ClassGenerator::finalizeMethod()
 }
 void ClassGenerator::setParamsCountForCurrentMethod(int count)
 {
-	cout << "setParamsForCurrentMethod(" << count << ")\n";
+//	cout << "setParamsForCurrentMethod(" << count << ")\n";
   method->setParamCount(count);
 }
 void ClassGenerator::createMethod(const char * name, int paramCount)
 {
-	cout << "createMethod(" << name << ")\n";
+//	cout << "createMethod(" << name << ")\n";
 	method = new Method(name);
 	method->setParamCount(paramCount);
 	cls->addMethod(method);
@@ -136,12 +136,13 @@ void ClassGenerator::createMethod(const char * name, int paramCount)
 
 void ClassGenerator::addField(const char * name)
 {
-	cout << "setting field: " <<  name << " = " << (int) (cls->addField(name));
+	cls->addField(name);
+//	cout << "setting field: " <<  name << " = " << (int) (cls->addField(name));
 }
 
 void ClassGenerator::setClassName(const char * name)
 {
-	cout << "setClassName(" << name << ")\n";
+//	cout << "setClassName(" << name << ")\n";
 	cls = new Class(name);
 	pool = new ConstantPool();
 	cls->setConstPool(pool);
@@ -195,7 +196,7 @@ int ClassGenerator::emitNonCompleteJump(INSTRUCTION ins)
 void ClassGenerator::emitCall(INSTRUCTION ins, const char * methodName, int paramCount, const char * className)
 {
 	emit(ins);
-	cout << "emitCall: ";
+//	cout << "emitCall: ";
 	if(ins == CALL)
 	{
 		if(classNames.find(className) == classNames.end())
@@ -205,7 +206,7 @@ void ClassGenerator::emitCall(INSTRUCTION ins, const char * methodName, int para
 			sprintf(cr.name, "%s", className);
 			classNames[className] = pool->addItem(&cr, CLASS_REF);
 		}
-		cout << "static classs: " << className << "[" << classNames[className] << "]::";
+//		cout << "static classs: " << className << "[" << classNames[className] << "]::";
 		emit2Byte(classNames[className]);
 		
 	}
@@ -219,7 +220,7 @@ void ClassGenerator::emitCall(INSTRUCTION ins, const char * methodName, int para
 		sprintf(mr.name, "%s", methodName);
 		methodNames[ss.str()] = pool->addItem(&mr, METHOD_REF);
 	}
-	cout << ss.str() << "[" << methodNames[ss.str()] << "]" << endl;
+//	cout << ss.str() << "[" << methodNames[ss.str()] << "]" << endl;
 	emit2Byte(methodNames[ss.str()]);
 }
 
@@ -286,7 +287,7 @@ bool ClassGenerator::localExist(const char* local)
 void ClassGenerator::loadLocal(const char * local)
 {
 	emit(LOAD_LOCAL);
-	cout << "loadLocal(" << local << ")" << endl;
+//	cout << "loadLocal(" << local << ")" << endl;
   if(locals.find(local) == locals.end())
     throw (std::string("Uknown local variable:") + local).c_str();
 	code[nextInsAddress ++] = locals[local];

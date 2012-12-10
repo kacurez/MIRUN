@@ -170,6 +170,8 @@ void ClassLoader::addClass(Class * c)
 	classTable[c->getName()] = c;
 }
 
+#include "instruction.h"
+
 void ClassLoader::initBuiltInClasses()
 {
 	classTable[INT_CLASS] = new Class(INT_CLASS);
@@ -183,9 +185,16 @@ void ClassLoader::initBuiltInClasses()
 	classTable[STRING_CLASS]->addField("value");
 	
 	classTable[ARRAY_CLASS] = new Class(ARRAY_CLASS);
+	classTable[ARRAY_CLASS]->addMethod(new ArraySize(classTable[INT_CLASS]));
 	
 	classTable[FILE_CLASS] = new Class(FILE_CLASS);
 	classTable[FILE_CLASS]->addField("file");
+	const char code[] = {RET_VOID};
+	Method *constr = new Method(FILE_CLASS);
+	constr->setCode(code, 1);
+	constr->setParamCount(1);
+	constr->setLocals(1);
+	classTable[FILE_CLASS]->addMethod(constr);
 	classTable[FILE_CLASS]->addMethod(new FileOpen());
 	classTable[FILE_CLASS]->addMethod(new FileClose());
 	classTable[FILE_CLASS]->addMethod(new FileWrite());
@@ -195,7 +204,11 @@ void ClassLoader::initBuiltInClasses()
 	
 	classTable[CONSOLE_CLASS] = new Class(CONSOLE_CLASS);
 	classTable[CONSOLE_CLASS]->addMethod(new Print());
+	classTable[CONSOLE_CLASS]->addMethod(new Println());
 	classTable[CONSOLE_CLASS]->addMethod(new ReadLine(classTable[STRING_CLASS]));
 	classTable[CONSOLE_CLASS]->addMethod(new ReadInt(classTable[INT_CLASS]));
 	classTable[CONSOLE_CLASS]->addMethod(new ReadReal(classTable[REAL_CLASS]));
+	
+	classTable[OBJECT_CLASS] = new Class(OBJECT_CLASS);
+	classTable[OBJECT_CLASS]->addMethod(new IsNull(classTable[INT_CLASS]));
 }
