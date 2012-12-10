@@ -5,11 +5,13 @@
 #include "lessie.tab.h"
 
 int createCnumber();
-int truncCreal();
+double truncCreal();
 
 char* createId();
+char* createStringLiteral();
+const int MAX_LENGTH = 25; // maximum length of id in characters
 
-const int MAX_LENGTH = 14; // maximum length of id in characters
+
 %}
 %option noyywrap
 /* %option c++ */
@@ -26,15 +28,15 @@ LETTER      [a-zA-Z_]
 "else"  { return ELSE; }
 "return" { return RETURN; }
 "for"   { return FOR; }
-"struct" {return STRUCT; }
+
 "class" {return CLASS_; }
 "def" {return DEF_;}
-
+"var" {return VAR_;}
 {WHITESPACE}+ 
 "\n" {yylineno++;}
 
 
-"::" {return COLON_;}
+"::" { return COLON_;}
 "}"  { return CURLY_CLOSE_; }
 "{"  { return CURLY_OPEN_; }
 "]"  { return SQUARE_CLOSE_; }
@@ -45,18 +47,17 @@ LETTER      [a-zA-Z_]
 "+"  { return PLUS; }
 "*"  { return MULT; }
 "-"  { return MINUS; }
-"/"  { return DIV; }
-"="  { return ASIGN; }
+"/"  { return DIV_; }
+"="  { return ASSIGN; }
 "==" { return EQUAL; }
 "!=" { return NOT_EQUAL; }
 ">=" { return GREATER_EQUAL; }
 "<=" { return LESS_EQUAL; }
 "<"  { return LESS; }
 ">"  { return GREATER; }
-"++" { return INC; }
-"--" { return DEC; }
-"+=" { return ADD_ASIGN; }
-"-=" { return MINUS_ASIGN; }
+"++" { return INC_; }
+"--" { return DEC_; }
+
 "."  { return POINT_; }
 ","  { return COMMA; }
 
@@ -69,7 +70,7 @@ L?\"(\\.|[^\\"])*\"	{ return STRING_LITERAL_; }
 
 
 . { 
-  char buffer[200];
+  char buffer[300];
   sprintf(buffer, "Unknown character '%s'\n", yytext, yylineno);
   yyerror(buffer);
 }
@@ -82,7 +83,7 @@ char* createStringLiteral()
 {
 int newLen = yyleng - 2;
 char *buffer = (char*)malloc(newLen + 1); 
-strncpy(buffer, yytext + 1, newlen);
+strncpy(buffer, yytext + 1, newLen);
 buffer[newLen] = '\0';
 return buffer;
 }
@@ -114,6 +115,8 @@ int createCnumber()
   
 /*MAIN*/
 int main(int argc, char **argv) {
+  fprintf(stdout,"asdasd");
+  return 0;
   char *fileName;
   int i, n = 0;
   for(i = 0; i<argc; ++i) {
@@ -122,7 +125,7 @@ int main(int argc, char **argv) {
   }
   --argc; 
   n++;
-  
+  printf("starting..");
   if (argc == n) {
     if((yyin = fopen (argv[argc], "r")) == NULL) 
         fprintf(stderr, "Invalid file %s\n", argv[argc]);

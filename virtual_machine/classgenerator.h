@@ -25,6 +25,11 @@ public:
 	void emitNew(const char * className);
   void emitNewArray(int size);
   void storeArray(const char* name,int index);
+  //emits IF_* insturction and writes the relative addres into the next address
+  void emitSimpleJump(INSTRUCTION ins, int addr);
+  void setParamsCountForCurrentMethod(int count);
+  //emits IF_|JUMP instruction and returns addres of the relative offset placement, call CompleteAddress to fill the offset after
+  int emitNonCompleteJump(INSTRUCTION ins);
 	/**
 	 * Emituje skok (jmp, if_*) na adresu.
 	 * @return ukazatel na pozici addr
@@ -44,6 +49,8 @@ public:
 	void storeLocal(const char * local);
 	void finalizeClass();
 	bool localExist(const char* local);
+  
+  
 	/**
 	 * Adresa pristi instrukce.
 	 */

@@ -2,11 +2,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <sstream>
-
+#include <iostream>
 #define INIT_CODE_SIZE 1024
 
 ClassGenerator::ClassGenerator(): code(new char[INIT_CODE_SIZE]), maxCode(INIT_CODE_SIZE)
 {
+  std::cout << "ctor" << std::endl;
 	//ctor
 }
 
@@ -15,6 +16,8 @@ ClassGenerator::~ClassGenerator()
 	delete [] code;
 	delete cls;
 }
+
+
 
 void ClassGenerator::emitPush(double value)
 {
@@ -70,7 +73,10 @@ void ClassGenerator::finalizeMethod()
 	method->setLocals(locals.size());
 	method->setFlag(0);
 }
-
+void ClassGenerator::setParamsCountForCurrentMethod(int count)
+{
+  method->setParamCount(count);
+}
 void ClassGenerator::createMethod(const char * name, int paramCount)
 {
 	method = new Method(name);
@@ -82,6 +88,7 @@ void ClassGenerator::createMethod(const char * name, int paramCount)
 
 void ClassGenerator::addField(const char * name)
 {
+  std::cout << "setting class name" << std::endl;
 	cls->addField(name);
 }
 
@@ -114,6 +121,18 @@ void ClassGenerator::emitNew(const char * className)
 void ClassGenerator::completeAddress(int addr)
 {
 	code[addr] = addr - nextInsAddress;
+}
+
+void ClassGenerator::emitSimpleJump(INSTRUCTION ins, int addr)
+{
+ emit(ins);
+ code[nextInsAddress ++] = addr;
+}
+int ClassGenerator::emitNonCompleteJump(INSTRUCTION ins)
+{
+  emit(ins);
+	checkCodeSize();
+  return nextInsAddress++;
 }
 
 int ClassGenerator::emitJump(INSTRUCTION ins, int addr)
