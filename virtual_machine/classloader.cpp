@@ -44,20 +44,20 @@ Class * ClassLoader::loadClass(const char * className)
 	cl = new Class(name);
 	cl->setConstPool(loadConstantPool());
 	file.read((char *)&fieldCount, sizeof(uint8_t));
-	cout << "field count = " << (int)fieldCount << endl;
+//	cout << "field count = " << (int)fieldCount << endl;
 	for(uint8_t i = 0; i< fieldCount; i ++)
 	{
 		file.read(name, IDENTIFIER_LENGTH);
 		cl->addField(name);
 	}
 	file.read((char *)&methodCount, sizeof(uint8_t));
-	cout << "method count = " << (int)methodCount << endl;
+//	cout << "method count = " << (int)methodCount << endl;
 	for(uint8_t i = 0; i < methodCount; i ++)
 	{
 		cl->addMethod(loadMethod());
 	}
 	file.close();
-	cout << "\nname = " << cl->getName() << endl;
+//	cout << "\nname = " << cl->getName() << endl;
 	return cl;
 }
 
@@ -81,7 +81,7 @@ Method * ClassLoader::loadMethod()
 	file.read(code, codeSize);
 	m->setCode(code, codeSize);
 	delete [] code;
-	cout << m->debugString() << endl;
+//	cout << m->debugString() << endl;
 	return m;
 }
 
@@ -91,7 +91,7 @@ ConstantPool * ClassLoader::loadConstantPool()
 	ConstantPool * pool = new ConstantPool();
 	ConstPoolStruct * item;
 	file.read((char *)&poolSize, sizeof(uint16_t));
-	cout << "const pool size = " << poolSize << endl;
+//	cout << "const pool size = " << poolSize << endl;
 	for(uint16_t i = 0; i < poolSize; i ++)
 	{
 		uint8_t type;
@@ -102,14 +102,14 @@ ConstantPool * ClassLoader::loadConstantPool()
 			{
 				item = new MethodRef;
 				file.read((char *)item, sizeof(MethodRef));
-				cout << "MethodRef[\"" << ((MethodRef *)item)->name << "\", " << (int)((MethodRef *)item)->params << "]" << endl;
+//				cout << "MethodRef[\"" << ((MethodRef *)item)->name << "\", " << (int)((MethodRef *)item)->params << "]" << endl;
 				break;
 			}
 			case CLASS_REF:
 			{
 				item = new ClassRef;
 				file.read((char *)item, sizeof(ClassRef));
-				cout << "ClassRef[\""  << ((ClassRef *)item)->name << "\"]" << endl;
+//				cout << "ClassRef[\""  << ((ClassRef *)item)->name << "\"]" << endl;
 				break;
 			}
 			case STRING_CONST:
@@ -119,28 +119,28 @@ ConstantPool * ClassLoader::loadConstantPool()
 				file.read((char *)&s->length, sizeof(uint16_t));
 				s->value = new char[s->length];
 				file.read(s->value, s->length);
-				cout << "String[\""  << s->value << "\", " << s->length << "]" << endl;
+//				cout << "String[\""  << s->value << "\", " << s->length << "]" << endl;
 				break;
 			}
 			case INT_CONST:
 			{
 				item = new IntConst;
 				file.read((char *)item, sizeof(IntConst));
-				cout << "Int[" << ((IntConst *)item)->value << "]" << endl;
+//				cout << "Int[" << ((IntConst *)item)->value << "]" << endl;
 				break;
 			}
 			case REAL_CONST:
 			{
 				item = new RealConst;
 				file.read((char *)item, sizeof(RealConst));
-				cout << "Real[" << ((RealConst *)item)->value << "]" << endl;
+//				cout << "Real[" << ((RealConst *)item)->value << "]" << endl;
 				break;
 			}
 			case FIELD_REF:
 			{
 				item = new FieldRef;
 				file.read((char *)item, sizeof(FieldRef));
-				cout << "ClassRef[\""  << ((FieldRef *)item)->name << "\"]" << endl;
+//				cout << "ClassRef[\""  << ((FieldRef *)item)->name << "\"]" << endl;
 				break;
 			}
 			default:

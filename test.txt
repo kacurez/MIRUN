@@ -1,32 +1,14 @@
 class aaa
 {
-	var member;
-	
-	def aaa()
-	{
-		member = 5;
-	}
 	
 	def main()
 	{
-		var a;
-		var b[10];
+		var c = new Counter();
 		var i;
-//		a = 1;
-//		console::print(a);
-//		if(a == 2)
-//		{
-//			console::print("a == 1");
-//		}
-//		else
-//		{
-//			console::print("a != 1");
-//		}
-		for(i = 0; 
-			i < 10; 
-			i = i + 1)
-		{
-//			console::print(b[i]);
-		}
+		console::print("Zadej číslo:");
+		i = console::readInt();
+		c.increase(i);
+		c.increase(10);
+		console::print(c.getValue());
 	}
 }

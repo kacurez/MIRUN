@@ -1,0 +1,20 @@
+class Counter 
+{
+	var counter;
+	
+	def Counter(self)
+	{
+		self.counter = 0;
+	}
+	
+	def increase(self, value)
+	{
+		self.counter = self.counter + value;
+	}
+	
+	def getValue(self)
+	{
+		increase(1);
+		return self.counter;
+	}
+}

@@ -281,11 +281,12 @@ suffixExpression :
 		 }
      |PAR_OPEN_ expression PAR_CLOSE_ 
      |NEW_ ID_
-     {generator.emitNew($2); generator.emit(DUP);}
+     {
+       generator.emitNew($2); generator.emit(DUP);}
      PAR_OPEN_ actualParameters PAR_CLOSE_
      {     	
             
-	generator.emitCall(CALL_DYNAMIC, $2, $5);
+	generator.emitCall(CALL, $2, $5 + 1, $2);
      }
      | functionCall | memberAccess |
       ID_ SQUARE_OPEN_ expression SQUARE_CLOSE_ 
@@ -309,14 +310,12 @@ suffixExpression :
      
     ;
 
-functionCall: ID_  POINT_ ID_ PAR_OPEN_ actualParameters PAR_CLOSE_ 
+functionCall: ID_  POINT_ ID_ PAR_OPEN_ 
+		{generator.loadLocal($1);}
+		actualParameters PAR_CLOSE_ 
 	    {
-	    	//push self as $1 object
-		generator.loadLocal($1);
-	    	//stores the reference of the object on to stack, ie PUSH(objectRef), object refenrce is retrieved by neame from $1 ;
-	    	generator.loadLocal($1);
 		//emits a member method call determined by its name in $3, $5(actualParameters) contains the count of the parameters
-		generator.emitCall(CALL_DYNAMIC, $3, $5);
+		generator.emitCall(CALL_DYNAMIC, $3, $6 + 1);
 	    }|
 	    /*CALL OF STATIC FUNCTION */
 	    ID_ COLON_ ID_ PAR_OPEN_ actualParameters PAR_CLOSE_ 
@@ -324,15 +323,13 @@ functionCall: ID_  POINT_ ID_ PAR_OPEN_ actualParameters PAR_CLOSE_
 		//static call $3- method name, $1 - class name, $5 - parameters count
 		generator.emitCall(CALL, $3, $5, $1);	    
 	    }|
-	    ID_ PAR_OPEN_ actualParameters PAR_CLOSE_ 
+	    ID_ PAR_OPEN_ 
+	    {generator.loadLocal("self")}
+	    actualParameters PAR_CLOSE_ 
 	    /*CALL local method - same as calling self.method(params)*/
 	    {
-	    	//push self as the first parameter of the function to call
-		generator.loadLocal("self");
-	    	//stores the reference of the object on to stack, ie PUSH(objectRef), this parameter is for CALL_DYNAMIC instruction ;	
-	    	generator.loadLocal("self");
 		//emits a member method call determined by its name in $3, $5(actualParameters) contains the count of the parameters
-		generator.emitCall(CALL_DYNAMIC, $1, $3);	    
+		generator.emitCall(CALL_DYNAMIC, $1, $4 + 1);	    
 	    }
 	    ;
 
@@ -343,11 +340,7 @@ memberAccess:
 		generator.loadMember($1,$3);	    
 	    }|ID_
 	    {
-	    //load local variable(preferably) or member variable on the stack
-	    if(generator.localExist($1))
 	    	generator.loadLocal($1);
-		else
-		generator.loadMember("self",$1);
 	    };
 
 actualParameters : /* eps */ 

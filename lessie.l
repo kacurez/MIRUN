@@ -30,6 +30,7 @@ LETTER      [a-zA-Z_]
 "for"   { return FOR; }
 
 "class" {return CLASS_; }
+"new" {return NEW_; }
 "def" {return DEF_;}
 "var" {return VAR_;}
 {WHITESPACE}+ 
