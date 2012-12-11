@@ -11,11 +11,16 @@ Interpret::~Interpret()
 	delete heap;
 }
 
-int Interpret::run(const char * className, const char * methodName)
+int Interpret::run(const char * className, const char * methodName, int argc, char ** argv)
 {
 	Class * cls =classLoader->getClass(className);
 	Method * m = cls->getMethod(methodName);
 	currentFrame = new StackFrame(m->getLocals(), m->getCode(), cls->getConstantPool());
+	uint32_t args = createArgs(argc, argv);
+	if(m->getParamCount() > 0)
+	{
+		currentFrame->setLocal(0, args);
+	}
 	return run();
 }
 
@@ -456,3 +461,21 @@ uint32_t Interpret::allocateArray(uint32_t length)
 	}
 	return ptr;
 }
+
+uint32_t Interpret::createArgs(int argc, char ** argv)
+{
+	if(argc <= 0)
+	{
+		return allocateArray(0);
+	}
+	uint32_t ptr = allocateArray(argc);
+	Object * o = heap->getObject(ptr);
+	for(int i = 0; i < argc; i ++)
+	{
+		uint32_t arg = allocateString(argv[i]);
+		o->setValue(i, arg);
+	}
+	return ptr;
+}
+
+

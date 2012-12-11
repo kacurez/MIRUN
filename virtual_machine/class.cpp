@@ -1,6 +1,6 @@
 #include "class.h"
 
-Class::Class(const char * name): name(name), pool(0)
+Class::Class(const char * name): name(name), methods(), pool(0)
 {
 	//ctor
 }

@@ -55,10 +55,10 @@ class Knapsack
 		}
 	}
 	
-	def main()
+	def main(args)
 	{
-		var filename = "input.txt";
 		var in = new file();
+		var out = new file();
 		var id;
 		var size;
 		var capacity;
@@ -68,7 +68,12 @@ class Knapsack
 		var i;
 		var problem;
 		var maximum;
-		in.open(filename);
+		if(args.size() < 2)
+		{
+			console::println("Specify input and output file.");
+			return 1;
+		}else{;}
+		in.open(args[0], "r");
 		
 		id = in.readInt();
 		size = in.readInt();
@@ -90,7 +95,11 @@ class Knapsack
 			console::print(id);
 			console::print(" ");
 			console::println(maximum.cost);
+			out.open(args[1], "w");
+			out.write("Optimal cost is ");
+			out.write(maximum.cost);
+			out.close();
 		}
-		
+		return 0;
 	}
 }

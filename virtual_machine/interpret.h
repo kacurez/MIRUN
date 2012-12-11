@@ -11,7 +11,7 @@ class Interpret
 public:
 	Interpret(ClassLoader * classLoader);
 	~Interpret();
-	int run(const char * className, const char * methodName);
+	int run(const char * className, const char * methodName, int args = 0, char ** argv = 0);
 	
 private:
 	int run();
@@ -30,6 +30,7 @@ private:
 	uint32_t allocateNumber(double value);
 	uint32_t allocateNumber(int value);
 	uint32_t allocateArray(uint32_t length);
+	uint32_t createArgs(int argc, char ** argv);
 
 	StackFrame * currentFrame;
 	ClassLoader * classLoader;

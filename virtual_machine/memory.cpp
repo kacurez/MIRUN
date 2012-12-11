@@ -2,7 +2,7 @@
 #include "bytecodeconstants.h"
 #include <string.h>
 
-#define MEMORY_SIZE 1000000
+#define MEMORY_SIZE 10000000
 
 using namespace std;
 
@@ -150,9 +150,9 @@ FILE * Memory::getFileStream(uint32_t file)
 	return ret;
 }
 
-uint32_t Memory::createFile(const char * fileName)
+uint32_t Memory::createFile(const char * fileName, const char * mask)
 {
-	FILE * file = fopen(fileName,  "rw");
+	FILE * file = fopen(fileName, mask);
 	if(file)
 	{
 		memcpy(used + size, &file, sizeof(FILE *));

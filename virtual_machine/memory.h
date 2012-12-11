@@ -23,7 +23,7 @@ public:
 	uint32_t allocateArray(Class * cls, uint32_t length);
 	double getDoubleValue(uint32_t ref) const;
 	const char * getStringValue(uint32_t ref) const;
-	uint32_t createFile(const char * fileName);
+	uint32_t createFile(const char * fileName, const char * mask);
 	FILE * getFileStream(uint32_t file);
 	void gc(StackFrame * stack);
 

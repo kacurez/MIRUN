@@ -137,18 +137,19 @@ class FileOpen: public NativeMethod
 public:
 	FileOpen(): NativeMethod("open")
 	{
-		setParamCount(2);
+		setParamCount(3);
 	}
 	
 	uint32_t run(Memory * heap)
 	{
 		Object * self = heap->getObject(params[0]);
 		Object * fileName = heap->getObject(params[1]);
+		Object * mask = heap->getObject(params[2]);
 		if(self->getType()->getName() != FILE_CLASS || fileName->getType()->getName() != STRING_CLASS)
 		{
 			throw "Invalid parameter type for file open.";
 		}
-		uint32_t file = heap->createFile(heap->getStringValue(fileName->getValue(1)));
+		uint32_t file = heap->createFile(heap->getStringValue(fileName->getValue(1)), heap->getStringValue(mask->getValue(1)));
 		self->setValue(0, file);
 		return VM_NULL;
 	}
@@ -232,7 +233,8 @@ public:
 		}
 		FILE * file = heap->getFileStream(self->getValue(0));
 		int32_t value;
-		fscanf(file, "%i", &value);
+		int i  = fscanf(file, "%i", &value);
+		int err = ferror(file);
 		return heap->allocateNumber(integer, value);
 	}
 private:
@@ -279,7 +281,7 @@ public:
 			throw "Not a file.";
 		}
 		FILE * file = heap->getFileStream(self->getValue(0));
-		Object * o = heap->getObject(params[0]);
+		Object * o = heap->getObject(params[1]);
 		std::string className = o->getType()->getName();
 		if(className == INT_CLASS)
 		{
